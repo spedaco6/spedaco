@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme  { 
+  --color-error: var(--color-red-500);
+  --color-error-50: var(--color-red-50);
+  --color-error-100: var(--color-red-100);
+  --color-error-200: var(--color-red-200);
+  --color-error-300: var(--color-red-300);
+  --color-error-400: var(--color-red-400);
+  --color-error-500: var(--color-red-500);
+  --color-error-600: var(--color-red-600);
+  --color-error-700: var(--color-red-700);
+  --color-error-800: var(--color-red-800);
+  --color-error-900: var(--color-red-900);
+  --color-error-950: var(--color-red-950);
+  
+  --color-disabled: var(--color-gray-500);
+  --color-disabled-50: var(--color-gray-50);
+  --color-disabled-100: var(--color-gray-100);
+  --color-disabled-200: var(--color-gray-200);
+  --color-disabled-300: var(--color-gray-300);
+  --color-disabled-400: var(--color-gray-400);
+  --color-disabled-500: var(--color-gray-500);
+  --color-disabled-600: var(--color-gray-600);
+  --color-disabled-700: var(--color-gray-700);
+  --color-disabled-800: var(--color-gray-800);
+  --color-disabled-900: var(--color-gray-900);
+  --color-disabled-950: var(--color-gray-950);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}

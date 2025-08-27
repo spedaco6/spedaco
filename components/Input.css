@@ -1,0 +1,54 @@
+@layer components {
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+
+  .input-container input, 
+  .input-container textarea, 
+  .input-container select {
+    background-color: var(--color-slate-200);
+    outline-color: var(--color-slate-500);
+    border-radius: .5rem;
+    padding: .2rem .5rem;
+  }
+
+  .input-container textarea {
+    height: 10rem;
+    resize: none;
+  }
+
+  .input-container div.input-checkbox {
+    display: flex;
+    gap: .5rem;
+  }
+
+  /* Error Styles */
+  .input-container.error p.error, 
+  .input-container.error label {
+    color: var(--color-error);
+  }
+  
+  .input-container.error input, 
+  .input-container.error textarea, 
+  .input-container.error select {
+    border-color: var(--color-error);
+    outline-color: var(--color-error-500);
+    background-color: var(--color-error-100);
+  }
+
+  /* Disabled Styles */
+  .input-container.disabled label {
+    color: var(--color-disabled);
+    user-select: none;
+  }
+  
+  .input-conatiner.disabled input,
+  .input-conatiner.disabled textarea,
+  .input-conatiner.disabled select {
+    border-color: var(--color-disabled);
+    outline-color: var(--color-disabled-500);
+    background-color: var(--color-disabled-100);
+  }
+}
