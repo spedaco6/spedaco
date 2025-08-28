@@ -1,7 +1,7 @@
 "use client"
 
 import { IS_REQUIRED, ValidationFn, validationUtils } from "@/lib/validation"
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type UseInputReturn = {
   name: string,
@@ -15,40 +15,71 @@ export type UseInputReturn = {
   onReset: () => void,
 }
 
-export interface UseInputOptions {
+export interface UseInputOptionsInput {
   enforceValidation?: boolean,
   required?: boolean,
   dependencies?: string[],
 }
 
+type UseInputOptions = Required<UseInputOptionsInput>;
+
 export default function useInput(
-  initName: string, 
-  initValue: string | boolean | number,
+  initName: string = "", 
+  initValue: string | boolean | number = "",
   initValidation: ValidationFn[] =[],
-  initOptions: UseInputOptions = {}
+  initOptions: UseInputOptionsInput = {}
 ): UseInputReturn {
   const { name, isRequired } = validationUtils.removeAsterisk(initName);
-  const [ value, setValue ] = useState(initValue);
-  const [ errors, setErrors ] = useState([]);
-  const [ condition, setCondition ] = useState({ blurred: false, touched: false });
+    
+  const validation = useMemo((): ValidationFn[] => {
+    if (isRequired) return [...initValidation, IS_REQUIRED];
+    return [...initValidation];
+  }, [initValidation, isRequired]);
+
+  const options: UseInputOptions = useMemo((): UseInputOptions => {
+    return {
+      enforceValidation: false,
+      dependencies: [],
+      required: isRequired,
+      ...initOptions,
+    }
+  }, [initOptions, isRequired]);
+  
+  const [ value, setValue ] = useState<string | number | boolean>(initValue);
+  const [ errors, setErrors ] = useState<string[]>([]);
+  const [ condition, setCondition ] = useState<{ blurred: boolean, touched: boolean }>({ blurred: false, touched: false });
+
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
-
-  }, []);
+    setCondition(prev => ({ ...prev, touched: true }));
+    const { value: newValue } = e.target;
+    // Validate
+    if (condition.blurred) {
+      const { errors: newErrors } = validationUtils.validateAll(newValue, validation);
+      setErrors(newErrors);
+    }
+    setValue(newValue);
+  }, [validation, condition.blurred]);
 
   const onBlur = useCallback((): void => {
+    if (condition.touched) {
+      if (!condition.blurred) setCondition(prev => ({ ...prev, blurred: true }));
+      const { errors: newErrors } = validationUtils.validateAll(value, validation);
+      setErrors(newErrors);
+    }
+  }, [condition, validation, value]);
 
-  }, []);
-
-  const onReset = useCallback((): void => {
-
-  }, []);
+  const onReset = useCallback((resetErrors: boolean = true): void => {
+    setValue(initValue);
+    setCondition({ blurred: false, touched: false });
+    if (resetErrors) setErrors([]);
+  }, [initValue]);
 
   return {
     name,
     value,
     errors,
-    isRequired,
+    isRequired: options.required,
     touched: condition.touched,
     blurred: condition.blurred,
     onChange,
