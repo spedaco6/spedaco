@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, render, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, vitest } from "vitest";
 import useInput from "./useInput";
 import { validationUtils } from "@/lib/validation";
@@ -134,7 +134,7 @@ describe("useInput hook", () => {
     });
   });
   
-  describe("validation triggers", () => {
+  describe("validation sequence and behavior", () => {
     test("no errors are visible before first validation", () => {
       const hook = renderHook(() => useInput("name", "", [() => ({ isValid: false, errors: ["Invalid"]})])).result;
       act(() => hook.current.onBlur());
@@ -148,6 +148,30 @@ describe("useInput hook", () => {
       act(() => hook.current.onBlur());
       expect(hook.current).toHaveProperty("errors");
       expect(hook.current.errors).toHaveLength(0);
+    });
+    test("errors are not present if input is not required and value is empty", () => {
+      const hook = renderHook(() => useInput("name", "", [() => ({ isValid: false, errors:["Invalid"] })])).result;
+      act(() => hook.current.onChange({ target: { value: "value" }}));
+      act(() => hook.current.onBlur());
+      act(() => hook.current.onChange({ target: { value: "" }}));
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(0);
+    });
+    test("errors are removed onChange when validation is succesful", () => {
+      const hook = renderHook(() => useInput("name", "", [(val) => {
+        const isValid = val.length > 3;
+        return { isValid, errors: isValid ? [] : ["Invalid"] }
+      }])).result;
+      act(() => hook.current.onChange({ target: { value: "val" }}));
+      act(() => hook.current.onBlur());
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(1);
+      act(() => hook.current.onChange({ target: { value: "valu" }}));
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(0);
+      act(() => hook.current.onChange({ target: { value: "val" }}));
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(1);
     });
     test("errors are present in the errors property after failed validation", () => {
       const hook = renderHook(() => useInput("name", "", [() => ({ isValid: false, errors: ["Invalid"]})])).result;

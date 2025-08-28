@@ -66,30 +66,38 @@ export default function useInput(
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
     setCondition(prev => ({ ...prev, touched: true }));
     const { value: newValue } = e.target;
-    // Validate only if input has first been blurred
+    
+    // Validate only if input has first been blurred. (Blurred occurs only after input is touched)
     if (condition.blurred) {
       const { errors: newErrors } = validationUtils.validateAll(newValue, validation);
-      setErrors(newErrors);
+      
+      // Only include errors if value is truthy or if it is required
+      const clearErrors = !newValue && !options.required;
+      setErrors(clearErrors ? [] : newErrors);
     }
     setValue(newValue);
-  }, [validation, condition.blurred]);
-
+  }, [validation, condition.blurred, options.required]);
+  
   const onBlur = useCallback((): void => {
     // Validate only if input has been touched
     if (condition.touched) {
       // Updated blurred condition
       if (!condition.blurred) setCondition(prev => ({ ...prev, blurred: true }));
-
+      
       // Validate new value
       const { isValid, errors: newErrors } = validationUtils.validateAll(value, validation);
-      setErrors(newErrors);
+      
+      // Only include errors if value is truthy or if it is required
+      const clearErrors = !value && !options.required;
+      setErrors(clearErrors ? [] : newErrors);
       
       // Save value to prevValue if enforceValidation is true
       if (options.enforceValidation && isValid) setPrevValue(value);
+      
       // Revert to previous valid value if enforceValidation is true
       if (options.enforceValidation && !isValid) setValue(prevValue);
     }
-  }, [condition, validation, value, options.enforceValidation, prevValue]);
+  }, [condition, validation, value, options.enforceValidation, options.required, prevValue]);
 
   // Reset everything to initState. Preserve errors by passing false
   const onReset = useCallback((resetErrors: boolean = true): void => {
