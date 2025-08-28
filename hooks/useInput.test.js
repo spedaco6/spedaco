@@ -267,6 +267,18 @@ describe("useInput hook", () => {
       });
     });
 
+    describe("validate function", () => {
+      test("revalidates and updates errors array", () => {
+      
+      });
+      test("expect revalidation to occur once automatically", () => {
+      
+      });
+      test("does not revalidate if blurred is false", () => {
+      
+      });
+    });
+
     describe("dependencies", () => {
       describe("set through config options", () => {
         
@@ -294,18 +306,5 @@ describe("useInput hook", () => {
         });
       });
     });  
-  });
-
-  describe("validate events", () => {
-    
-    test("revalidates and updates errors array", () => {
-    
-    });
-    test("expect revalidation to occur once automatically", () => {
-    
-    });
-    test("does not revalidate if blurred is false", () => {
-    
-    });
   });
 });
