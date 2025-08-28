@@ -23,7 +23,7 @@ interface InputCondition {
 
 // External interface that allows props to be undefined
 export interface UseInputOptionsInput {
-  enforceValidation?: boolean,
+  enforceValidation?: "none" | "soft" | "hard",
   required?: boolean,
   dependencies?: string[],
 }
@@ -48,7 +48,7 @@ export default function useInput(
   // Update input options
   const options: UseInputOptions = useMemo((): UseInputOptions => {
     return {
-      enforceValidation: false,
+      enforceValidation: "none",
       dependencies: [],
       required: isRequired,
       ...initOptions,
@@ -75,9 +75,12 @@ export default function useInput(
     setCondition(prev => ({ ...prev, touched: true }));
     const { value: newValue } = e.target;
     // Validate only if input has first been blurred. (Blurred occurs only after input is touched)
-    _validate(newValue);
-    setValue(newValue);
-  }, [_validate]);
+    const { isValid } = _validate(newValue);
+    setValue(prev => {
+      if (options.enforceValidation === "hard" && !isValid) return prev;
+      return newValue
+    });
+  }, [_validate, options.enforceValidation]);
   
   const onBlur = useCallback((): void => {
     // Validate only if input has been touched
@@ -90,9 +93,10 @@ export default function useInput(
       // _validate usually setError will not because condition.blurred is only now adjusted
       setErrors(newErrors);
       // Save value to prevValue if enforceValidation is true
-      if (options.enforceValidation && isValid) setPrevValue(value);
+      if (options.enforceValidation !== "none" && isValid) setPrevValue(value);
       // Revert to previous valid value if enforceValidation is true
-      if (options.enforceValidation && !isValid) setValue(prevValue);
+      if (options.enforceValidation === "soft" && !isValid) setValue(prevValue);
+
     }
   }, [_validate, condition, value, options.enforceValidation, prevValue]);
 

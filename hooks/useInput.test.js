@@ -225,28 +225,88 @@ describe("useInput hook", () => {
   
   describe("options configuration object", () => {
     describe("enforceValidation property", () => {
-      let hook;
-      let options;
-      beforeEach(() => {
-        options = renderHook(() => useMemo(() => ({ enforceValidation: true }), [])).result;
-        hook = renderHook(() => useInput("name", "original", [() => ({ isValid: false, errors: ["Invalid"] })], options.current)).result;
+      describe("enforceValidation: 'none' behavior", () => {
+let hook;
+        let options;
+        beforeEach(() => {
+          options = renderHook(() => useMemo(() => ({ enforceValidation: "none" }), [])).result;
+          hook = renderHook(() => useInput("name", "original", [(val) => { 
+            const matches = val.match(/^[a-z]*$/);
+            if (matches) return { isValid: true, errors: [] };
+            return { isValid: false, errors: ["Invalid"]};
+          }], options.current)).result;
+        });
+        test("invalid values will update onChange", () => {
+          act(() => hook.current.onChange({ target: { value: "oriGinal" }}));
+          expect(hook.current).toHaveProperty("value", "oriGinal");
+        });
+        test("invalid values will not revert to last blurred valid value onBlur", () => {
+          act(() => hook.current.onChange({ target: { value: "oriGinal" }}));
+          act(() => hook.current.onBlur());
+          expect(hook.current).toHaveProperty("value", "oriGinal");
+        });
       });
-      test("value will update onChange", () => {
-        act(() => hook.current.onChange({ target: { value: "updated" }}));
-        expect(hook.current).toHaveProperty("value", "updated");
+      describe("enforceValidation: 'soft' behavior", () => {
+        let hook;
+        let options;
+        beforeEach(() => {
+          options = renderHook(() => useMemo(() => ({ enforceValidation: "soft" }), [])).result;
+          hook = renderHook(() => useInput("name", "original", [(val) => { 
+            const matches = val.match(/^[a-z]*$/);
+            if (matches) return { isValid: true, errors: [] };
+            return { isValid: false, errors: ["Invalid"]};
+          }], options.current)).result;
+        });
+        test("invalid values will update onChange", () => {
+          act(() => hook.current.onChange({ target: { value: "oriGinal" }}));
+          expect(hook.current).toHaveProperty("value", "oriGinal");
+        });
+        test("invalid values will revert to last blurred valid value onBlur", () => {
+          act(() => hook.current.onChange({ target: { value: "oriGinal" }}));
+          act(() => hook.current.onBlur());
+          expect(hook.current).toHaveProperty("value", "original");
+          act(() => hook.current.onChange({ target: { value: "updated" }}));
+          act(() => hook.current.onBlur());
+          expect(hook.current).toHaveProperty("value", "updated");
+          act(() => hook.current.onChange({ target: { value: "updateD" }}));
+          act(() => hook.current.onBlur());
+          expect(hook.current).toHaveProperty("value", "updated");
+        });
+        test("valid values will remain onBlur", () => {
+          act(() => hook.current.onChange({ target: { value: "updated" }}));
+          act(() => hook.current.onBlur());
+          expect(hook.current).toHaveProperty("value", "updated");
+        });
       });
-      test("values will revert to previous value onBlur", () => {
-        act(() => hook.current.onChange({ target: { value: "updated" }}));
-        act(() => hook.current.onBlur());
-        expect(hook.current).toHaveProperty("value", "original");
-      });
-      test("valid values will remain onBlur", () => {
-        const hook2 = renderHook(() => useInput("name", "original", [], options.current)).result;
-        act(() => hook2.current.onChange({ target: { value: "updated" }}));
-        act(() => hook2.current.onBlur());
-        expect(hook2.current).toHaveProperty("value", "updated");
+      describe("enforceValidation: 'hard' behavior", () => {
+        let hook;
+        let options;
+        beforeEach(() => {
+          options = renderHook(() => useMemo(() => ({ enforceValidation: "hard" }), [])).result;
+          hook = renderHook(() => useInput("name", "original", [(val) => { 
+            const matches = val.match(/^[a-z]*$/);
+            if (matches) return { isValid: true, errors: [] };
+            return { isValid: false, errors: ["Invalid"]};
+          }], options.current)).result;
+        });
+        test("invalid values will not update onChange if invalid", () => {
+          act(() => hook.current.onChange({ target: { value: "originalS" }}));
+          expect(hook.current).toHaveProperty("value", "original");
+        });
+        test("valid values will update onChange", () => {
+          act(() => hook.current.onChange({ target: { value: "originals" }}));
+          expect(hook.current).toHaveProperty("value", "originals");
+          act(() => hook.current.onChange({ target: { value: "updated" }}));
+          expect(hook.current).toHaveProperty("value", "updated");
+        });
+        test("valid values will remain onBlur", () => {
+          act(() => hook.current.onChange({ target: { value: "updated" }}));
+          act(() => hook.current.onBlur());
+          expect(hook.current).toHaveProperty("value", "updated");
+        });
       });
     });
+
 
     describe("required", () => {
       test("sets isRequired to true", () => {
