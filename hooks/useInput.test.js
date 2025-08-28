@@ -135,6 +135,20 @@ describe("useInput hook", () => {
   });
   
   describe("validation sequence and behavior", () => {
+    test("IS_REQUIRED validation is not added if other validation rules are present", () => {
+      const hook = renderHook(() => useInput("name*", "", [() => ({ isValid: false, errors: ["Invalid"]})])).result;
+      const hook2 = renderHook(() => useInput("name*", "", [])).result;
+      act(() => hook.current.onChange({ target: { value: "value" }}));
+      act(() => hook.current.onBlur());
+      act(() => hook.current.onChange({ target: { value: "" }}));
+      act(() => hook2.current.onChange({ target: { value: "value" }}));
+      act(() => hook2.current.onBlur());
+      act(() => hook2.current.onChange({ target: { value: "" }}));
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(1);
+      expect(hook2.current).toHaveProperty("errors");
+      expect(hook2.current.errors).toHaveLength(1);
+    });
     test("no errors are visible before first validation", () => {
       const hook = renderHook(() => useInput("name", "", [() => ({ isValid: false, errors: ["Invalid"]})])).result;
       act(() => hook.current.onBlur());
@@ -226,7 +240,7 @@ describe("useInput hook", () => {
   describe("options configuration object", () => {
     describe("enforceValidation property", () => {
       describe("enforceValidation: 'none' behavior", () => {
-let hook;
+        let hook;
         let options;
         beforeEach(() => {
           options = renderHook(() => useMemo(() => ({ enforceValidation: "none" }), [])).result;
@@ -320,43 +334,32 @@ let hook;
         expect(hook.current).toHaveProperty("isRequired", false);
       });
     });
-
-    describe("validate function", () => {
-      test("revalidates and updates errors array", () => {
-      
-      });
-      test("expect revalidation to occur once automatically", () => {
-      
-      });
-      test("does not revalidate if blurred is false", () => {
-      
-      });
-    });
-
+    
     describe("dependencies", () => {
       describe("set through config options", () => {
-        
-        test("are added to useInput dependency array", () => {
-        
-        });
+        let options;
+        let hook;
+        let hook2;
+        beforeEach(() => {
+          const MATCH = (value) => {
+            return (val) => {
+              if (val === value) return { isValid: true, errors: [] };
+              return { isValid: false, errors: ["Invalid"]};
+            }
+          }
+          hook = renderHook(() => useInput("name", "", [])).result;
+          options = renderHook(() => useMemo(() => ({ dependencies: [hook.current.value] }), [])).result;
+          hook2 = renderHook(() => useInput("name", "", [MATCH(hook.current.value)], options)).result;
+        })
         test("revalidation occurs when primary value changes", () => {
-        
-        });
-        test("revalidation occurs when secondary value changes", () => {
-        
-        });
-      });
-
-      describe("set through addDep", () => {
-        
-        test("are added to useInput dependency array", () => {
-        
-        });
-        test("revalidation occurs when primary value changes", () => {
-        
-        });
-        test("revalidation occurs when secondary value changes", () => {
-        
+          act(() => hook.current.onChange({ target: { value: "updated" }}));
+          act(() => hook.current.onBlur());
+          act(() => hook2.current.onChange({ target: { value: "updated" }}));
+          act(() => hook2.current.onBlur());
+          const spy = vitest.spyOn(validationUtils, "validateAll");
+          act(() => hook.current.onChange({ target: { value: "updatedAgain" }}));
+          expect(spy).toBeCalledTimes(2);
+          vitest.restoreAllMocks()
         });
       });
     });  
