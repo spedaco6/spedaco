@@ -1,4 +1,4 @@
-import { act, render, renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, vitest } from "vitest";
 import useInput from "./useInput";
 import { validationUtils } from "@/lib/validation";

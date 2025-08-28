@@ -89,3 +89,57 @@ export const MATCHES = (matchValue: unknown): ValidationFn => {
     return { isValid: errors.length === 0, errors };  
   }
 }
+
+export const CONTAINS_UC: ValidationFn = (initValue: unknown): Validity => {
+  const errors = [];
+  const value = validationUtils.getString(initValue); 
+  const regex = /^(?=.*[A-Z]).+$/;
+  const matches = value.match(regex);
+  if (!matches) {
+    errors.push("Must contain an upper-case letter");
+  }
+  return { isValid: errors.length === 0, errors };
+}
+
+export const CONTAINS_LC: ValidationFn = (initValue: unknown): Validity => {
+  const errors = [];
+  const value = validationUtils.getString(initValue); 
+  const regex = /^(?=.*[a-z]).+$/;
+  const matches = value.match(regex);
+  if (!matches) {
+    errors.push("Must contain a lower-case letter");
+  }
+  return { isValid: errors.length === 0, errors };
+}
+
+export const CONTAINS_SPECIAL: ValidationFn = (initValue: unknown): Validity => {
+  const errors = [];
+  const value = validationUtils.getString(initValue); 
+  const regex = /^(?=.*[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?`~]).+$/;
+  const matches = value.match(regex);
+  if (!matches) {
+    errors.push("Must contain a special character");
+  }
+  return { isValid: errors.length === 0, errors };
+}
+
+export const CONTAINS_NUMBER: ValidationFn = (initValue: unknown): Validity => {
+  const errors = [];
+  const value = validationUtils.getString(initValue); 
+  const regex = /^(?=.*\d).+$/;
+  const matches = value.match(regex);
+  if (!matches) {
+    errors.push("Must contain a number");
+  }
+  return { isValid: errors.length === 0, errors };
+}
+
+// Validation Presets
+type ValidationPresets = Record<string, ValidationFn[] | ((value: unknown) => ValidationFn[])>;
+export const PRESETS: ValidationPresets = {
+  EMAIL: [IS_EMAIL],
+  PASSWORD: [MIN(8), CONTAINS_LC, CONTAINS_UC, CONTAINS_SPECIAL, CONTAINS_NUMBER],
+  PASSWORD_CONFIRM(value: unknown) {
+    return [MIN(8), CONTAINS_LC, CONTAINS_UC, CONTAINS_SPECIAL, CONTAINS_NUMBER, MATCHES(value)];
+  },
+}
