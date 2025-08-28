@@ -8,10 +8,11 @@ export interface Validity {
 export type ValidationFn = (value: unknown) => Validity;
 
 export const validationUtils = {
-  removeAsterisk: (name: string): { name: string, isRequired: boolean } => { 
-    if (name === "*") {
+  removeAsterisk: (initName: string): { name: string, isRequired: boolean } => { 
+    const name = validationUtils.trimAndDespace(initName);
+    if (name === "*" || name === "") {
       const random = randomUUID();
-      return { name: `no-name-${random}`, isRequired: true };
+      return { name: `no-name-${random}`, isRequired: name === "*" };
     }
     const matches = name.match(/^(?<name>.+)\*$/);
     const revName = matches?.groups?.name || name;
