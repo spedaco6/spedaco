@@ -1,7 +1,7 @@
 "use client"
 
 import { IS_REQUIRED, ValidationFn, validationUtils } from "@/lib/validation"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type UseInputReturn = {
   name: string,
@@ -15,12 +15,20 @@ export type UseInputReturn = {
   onReset: () => void,
 }
 
+// Interface for input changes and blurs
+interface InputCondition {
+  touched: boolean,
+  blurred: boolean,
+};
+
+// External interface that allows props to be undefined
 export interface UseInputOptionsInput {
   enforceValidation?: boolean,
   required?: boolean,
   dependencies?: string[],
 }
 
+// Internal type that require all props
 type UseInputOptions = Required<UseInputOptionsInput>;
 
 export default function useInput(
@@ -29,13 +37,16 @@ export default function useInput(
   initValidation: ValidationFn[] =[],
   initOptions: UseInputOptionsInput = {}
 ): UseInputReturn {
+  // Check if name contains trailing asterisk
   const { name, isRequired } = validationUtils.removeAsterisk(initName);
     
-  const validation = useMemo((): ValidationFn[] => {
+  // Update validationFns
+  const validation: ValidationFn[] = useMemo((): ValidationFn[] => {
     if (isRequired) return [...initValidation, IS_REQUIRED];
     return [...initValidation];
   }, [initValidation, isRequired]);
 
+  // Update input options
   const options: UseInputOptions = useMemo((): UseInputOptions => {
     return {
       enforceValidation: false,
@@ -45,15 +56,17 @@ export default function useInput(
     }
   }, [initOptions, isRequired]);
   
+  // prevValue saves the last valid value in case it must be reverted
+  const [ prevValue, setPrevValue ] = useState<string | number | boolean>(initValue);
   const [ value, setValue ] = useState<string | number | boolean>(initValue);
   const [ errors, setErrors ] = useState<string[]>([]);
-  const [ condition, setCondition ] = useState<{ blurred: boolean, touched: boolean }>({ blurred: false, touched: false });
+  const [ condition, setCondition ] = useState<InputCondition>({ blurred: false, touched: false });
 
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
     setCondition(prev => ({ ...prev, touched: true }));
     const { value: newValue } = e.target;
-    // Validate
+    // Validate only if input has first been blurred
     if (condition.blurred) {
       const { errors: newErrors } = validationUtils.validateAll(newValue, validation);
       setErrors(newErrors);
@@ -62,13 +75,23 @@ export default function useInput(
   }, [validation, condition.blurred]);
 
   const onBlur = useCallback((): void => {
+    // Validate only if input has been touched
     if (condition.touched) {
+      // Updated blurred condition
       if (!condition.blurred) setCondition(prev => ({ ...prev, blurred: true }));
-      const { errors: newErrors } = validationUtils.validateAll(value, validation);
-      setErrors(newErrors);
-    }
-  }, [condition, validation, value]);
 
+      // Validate new value
+      const { isValid, errors: newErrors } = validationUtils.validateAll(value, validation);
+      setErrors(newErrors);
+      
+      // Save value to prevValue if enforceValidation is true
+      if (options.enforceValidation && isValid) setPrevValue(value);
+      // Revert to previous valid value if enforceValidation is true
+      if (options.enforceValidation && !isValid) setValue(prevValue);
+    }
+  }, [condition, validation, value, options.enforceValidation, prevValue]);
+
+  // Reset everything to initState. Preserve errors by passing false
   const onReset = useCallback((resetErrors: boolean = true): void => {
     setValue(initValue);
     setCondition({ blurred: false, touched: false });

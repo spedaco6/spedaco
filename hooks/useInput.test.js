@@ -219,14 +219,14 @@ describe("useInput hook", () => {
       });
       test("values will revert to previous value onBlur", () => {
         act(() => hook.current.onChange({ target: { value: "updated" }}));
-        act(() => hook.current.onBlur);
+        act(() => hook.current.onBlur());
         expect(hook.current).toHaveProperty("value", "original");
       });
       test("valid values will remain onBlur", () => {
         const hook2 = renderHook(() => useInput("name", "original", [], options.current)).result;
         act(() => hook2.current.onChange({ target: { value: "updated" }}));
-        act(() => hook2.current.onBlur);
-        expect(hook.current).toHaveProperty("value", "updated");
+        act(() => hook2.current.onBlur());
+        expect(hook2.current).toHaveProperty("value", "updated");
       });
     });
 
