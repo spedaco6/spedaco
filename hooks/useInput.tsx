@@ -39,7 +39,6 @@ export default function useInput(
 ): UseInputReturn {
   // Check if name contains trailing asterisk
   const { name, isRequired } = validationUtils.removeAsterisk(initName);
-    
   // Update validationFns
   const validation: ValidationFn[] = useMemo((): ValidationFn[] => {
     if (isRequired) return [...initValidation, IS_REQUIRED];
@@ -63,45 +62,39 @@ export default function useInput(
   const [ condition, setCondition ] = useState<InputCondition>({ blurred: false, touched: false });
 
   const _validate = useCallback((newValue: unknown): Validity => {
-      const { isValid, errors: newErrors } = validationUtils.validateAll(newValue, validation);
-      // Only include errors if value is truthy or if it is required
+      const { isValid, errors: returnedErrors } = validationUtils.validateAll(newValue, validation);
+      // Only setErrors if value is truthy or if it is required
       const clearErrors = !newValue && !options.required;
-      setErrors(clearErrors ? [] : newErrors);
+      const newErrors = clearErrors ? [] : returnedErrors;
+      // Only setErrors if input has been blurred
+      if (condition.blurred) setErrors(newErrors);
       return { isValid, errors: newErrors };
-  }, [validation, options.required]);
-
-  const revalidate = useCallback((): Validity => {
-      const { isValid, errors: newErrors } = validationUtils.validateAll(value, validation);
-      // Only include errors if value is truthy or if it is required
-      const clearErrors = !value && !options.required;
-      setErrors(clearErrors ? [] : newErrors);
-      return { isValid, errors: newErrors };
-  }, [validation, options.required, value]);
+  }, [validation, options.required, condition.blurred]);
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
     setCondition(prev => ({ ...prev, touched: true }));
     const { value: newValue } = e.target;
     // Validate only if input has first been blurred. (Blurred occurs only after input is touched)
-    if (condition.blurred) _validate(newValue);
+    _validate(newValue);
     setValue(newValue);
-  }, [_validate, condition.blurred]);
+  }, [_validate]);
   
   const onBlur = useCallback((): void => {
     // Validate only if input has been touched
     if (condition.touched) {
       // Updated blurred condition
       if (!condition.blurred) setCondition(prev => ({ ...prev, blurred: true }));
-      
       // Validate new value
-      const { isValid } = revalidate();
-      
+      const { isValid, errors: newErrors } = _validate(value);
+      // Only include errors if value is truthy or if it is required
+      // _validate usually setError will not because condition.blurred is only now adjusted
+      setErrors(newErrors);
       // Save value to prevValue if enforceValidation is true
       if (options.enforceValidation && isValid) setPrevValue(value);
-      
       // Revert to previous valid value if enforceValidation is true
       if (options.enforceValidation && !isValid) setValue(prevValue);
     }
-  }, [revalidate, condition, value, options.enforceValidation, prevValue]);
+  }, [_validate, condition, value, options.enforceValidation, prevValue]);
 
   // Reset everything to initState. Preserve errors by passing false
   const onReset = useCallback((resetErrors: boolean = true): void => {

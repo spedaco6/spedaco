@@ -186,44 +186,38 @@ describe("useInput hook", () => {
       expect(spy).toHaveBeenCalledTimes(0);
       vitest.restoreAllMocks();
     });
-    test("validation does not occur before the first onBlur event following an onChange event", () => {
+    test("errors do not populate before first onBlur event following onChange", () => {
       const spy = vitest.spyOn(validationUtils, "validateAll");
-      const hook = renderHook(() => useInput("name", "initValue", [])).result;
+      const hook = renderHook(() => useInput("name", "initValue", [() => ({ isValid: false, errors:["Invalid"]})])).result;
       act(() => hook.current.onBlur());
       expect(spy).toHaveBeenCalledTimes(0);
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(0);
       act(() => hook.current.onChange({ target: { value: "value" }}));
-      expect(spy).toHaveBeenCalledTimes(0);
-      vitest.restoreAllMocks();
-    });
-    test("validation occurs after the first onBlur event following an onChange event", () => {
-      const spy = vitest.spyOn(validationUtils, "validateAll");
-      const hook = renderHook(() => useInput("name", "initValue", [])).result;
-      act(() => hook.current.onChange({ target: { value: "value" }}));
-      act(() => hook.current.onBlur());
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(0);
       vitest.restoreAllMocks();
     });
-    test("revalidation occurs after each onChange event following initial validation", () => {
+    test("errors populate after every onBlur event following an onChange event", () => {
+      const spy = vitest.spyOn(validationUtils, "validateAll");
+      const hook = renderHook(() => useInput("name", "initValue", [() => ({ isValid: false, errors:["Invalid"]})])).result;
+      act(() => hook.current.onBlur());
+      act(() => hook.current.onChange({ target: { value: "value" }}));
+      act(() => hook.current.onBlur());
+      expect(spy).toHaveBeenCalledTimes(2);
+      expect(hook.current).toHaveProperty("errors");
+      expect(hook.current.errors).toHaveLength(1);
+      vitest.restoreAllMocks();
+    });
+    test("revalidation occurs after every onChange event", () => {
       const spy = vitest.spyOn(validationUtils, "validateAll");
       const hook = renderHook(() => useInput("name", "initValue", [])).result;
       act(() => hook.current.onChange({ target: { value: "value" }}));
-      act(() => hook.current.onBlur());
       expect(spy).toHaveBeenCalledTimes(1);
       act(() => hook.current.onChange({ target: { value: "val" }}));
       expect(spy).toHaveBeenCalledTimes(2);
       act(() => hook.current.onChange({ target: { value: "v" }}));
-      expect(spy).toHaveBeenCalledTimes(3);
-      vitest.restoreAllMocks();
-    });
-    test("revalidation occurs after each onBlur event following initial validation", () => {
-      const spy = vitest.spyOn(validationUtils, "validateAll");
-      const hook = renderHook(() => useInput("name", "initValue", [])).result;
-      act(() => hook.current.onChange({ target: { value: "value" }}));
-      act(() => hook.current.onBlur());
-      expect(spy).toHaveBeenCalledTimes(1);
-      act(() => hook.current.onBlur());
-      expect(spy).toHaveBeenCalledTimes(2);
-      act(() => hook.current.onBlur());
       expect(spy).toHaveBeenCalledTimes(3);
       vitest.restoreAllMocks();
     });
