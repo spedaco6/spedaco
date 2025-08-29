@@ -1,7 +1,7 @@
 "use client"
 
 import { IS_REQUIRED, ValidationFn, validationUtils, Validity } from "@/lib/validation"
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type UseInputReturn = {
   name: string,
@@ -13,6 +13,7 @@ export type UseInputReturn = {
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onBlur: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onReset: () => void,
+  validate: () => void,
 }
 
 // Interface for input changes and blurs
@@ -25,11 +26,8 @@ interface InputCondition {
 export interface UseInputOptionsInput {
   enforceValidation?: "none" | "soft" | "hard",
   required?: boolean,
-  dependencies?: string[],
+  dependencies?: (string | number | boolean)[],
 }
-
-// Internal type that require all props
-type UseInputOptions = Required<UseInputOptionsInput>;
 
 export default function useInput(
   initName: string = "", 
@@ -38,22 +36,15 @@ export default function useInput(
   initOptions: UseInputOptionsInput = {}
 ): UseInputReturn {
   // Check if name contains trailing asterisk
-  const { name, isRequired } = validationUtils.removeAsterisk(initName);
+  const result: { name: string, isRequired: boolean } = validationUtils.removeAsterisk(initName);
+  const { name } = result;
+  const isRequired: boolean = initOptions?.required ?? result.isRequired;
+
   // Update validationFns
   const validation: ValidationFn[] = useMemo((): ValidationFn[] => {
     if (isRequired && initValidation.length === 0) return [...initValidation, IS_REQUIRED];
     return [...initValidation];
   }, [initValidation, isRequired]);
-
-  // Update input options
-  const options: UseInputOptions = useMemo((): UseInputOptions => {
-    return {
-      enforceValidation: "none",
-      dependencies: [],
-      required: isRequired,
-      ...initOptions,
-    }
-  }, [initOptions, isRequired]);
   
   // prevValue saves the last valid value in case it must be reverted
   const [ prevValue, setPrevValue ] = useState<string | number | boolean>(initValue);
@@ -61,14 +52,18 @@ export default function useInput(
   const [ errors, setErrors ] = useState<string[]>([]);
   const [ condition, setCondition ] = useState<InputCondition>({ blurred: false, touched: false });
 
+  // Extract options configuration
+  const enforceValidation: "none"| "soft" | "hard" = initOptions?.enforceValidation ?? "none";
+  const dependencyString: string = initOptions?.dependencies ? "d:" + initOptions?.dependencies?.join(",") : "";
+
   const validate = useCallback((newValue: unknown = value): Validity => {
       const { isValid, errors: returnedErrors } = validationUtils.validateAll(newValue, validation);
       // Only setErrors if value is truthy or if it is required
-      const clearErrors = !newValue && !options.required;
+      const clearErrors = !newValue && !isRequired;
       const newErrors = clearErrors ? [] : returnedErrors;
       // Only setErrors if input has been blurred
       return { isValid, errors: newErrors };
-  }, [validation, options.required, value]);
+  }, [validation, isRequired, value]);
 
   const onChange: React.ChangeEventHandler<
     HTMLInputElement | 
@@ -87,10 +82,11 @@ export default function useInput(
     if (condition.blurred) setErrors(newErrors);
 
     setValue(prev => {
-      if (options.enforceValidation === "hard" && !isValid) return prev;
-      return newValue
+      if (enforceValidation === "hard" && !isValid) return prev;
+      return newValue;
     });
-  }, [validate, condition.blurred, options.enforceValidation]);
+
+  }, [validate, condition.blurred, enforceValidation]);
   
   const onBlur: React.ChangeEventHandler<
     HTMLInputElement | 
@@ -99,20 +95,19 @@ export default function useInput(
     > = useCallback((): void => {
     // Validate only if input has been touched
     if (condition.touched) {
-      // Updated blurred condition
-      if (!condition.blurred) setCondition(prev => ({ ...prev, blurred: true }));
-      // Validate new value
-      const { isValid, errors: newErrors } = validate();
-      // Only include errors if value is truthy or if it is required
-      // validate usually setError will not because condition.blurred is only now adjusted
-      setErrors(newErrors);
-      // Save value to prevValue if enforceValidation is true
-      if (options.enforceValidation !== "none" && isValid) setPrevValue(value);
-      // Revert to previous valid value if enforceValidation is true
-      if (options.enforceValidation === "soft" && !isValid) setValue(prevValue);
-
+    // Updated blurred condition
+    if (!condition.blurred) setCondition(prev => ({ ...prev, blurred: true }));
+    // Validate new value
+    const { isValid, errors: newErrors } = validate();
+    // Only include errors if value is truthy or if it is required
+    // validate usually setError will not because condition.blurred is only now adjusted
+    setErrors(newErrors);
+    // Save value to prevValue if enforceValidation is true
+    if (enforceValidation !== "none" && isValid) setPrevValue(value);
+    // Revert to previous valid value if enforceValidation is true
+    if (enforceValidation === "soft" && !isValid) setValue(prevValue);
     }
-  }, [validate, condition, value, options.enforceValidation, prevValue]);
+  }, [validate, condition, value, enforceValidation, prevValue]);
 
   // Reset everything to initState. Preserve errors by passing false
   const onReset = useCallback((resetErrors: boolean = true): void => {
@@ -121,15 +116,23 @@ export default function useInput(
     if (resetErrors) setErrors([]);
   }, [initValue]);
 
+  useEffect(() => {
+    if (condition.blurred && dependencyString.length > 0) {
+      const result = validate();
+      setErrors(result.errors);
+    }
+  }, [condition.blurred, validate, dependencyString]);
+
   return {
     name,
     value,
     errors,
-    isRequired: options.required,
+    isRequired,
     touched: condition.touched,
     blurred: condition.blurred,
     onChange,
     onBlur,
     onReset,
+    validate,
   }
 }
