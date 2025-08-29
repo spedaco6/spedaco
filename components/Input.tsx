@@ -1,5 +1,6 @@
 import React from "react";
 import "./Input.css";
+import { UseInputReturn } from "@/hooks/useInput";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   title?: string,
@@ -7,42 +8,77 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   options?: string[],
   disabled?: boolean,
   hideErrors?: boolean,
+  hideLabel?: boolean,
   errors?: string[],
+  hook?: UseInputReturn,
 }
 
 export default function Input({ 
   className="",
   title="", 
-  type="text", 
+  type, 
   options = [],
   disabled = false, 
   hideErrors = false,
+  hideLabel = false,
+  required,
   errors = [],
+  name,
+  id,
+  value,
+  onChange,
+  onBlur,
+  hook,
   ...props 
 }: React.PropsWithChildren<InputProps>): React.ReactElement {;
-  const isError: boolean = hideErrors ? false : errors.length > 0;
+  // Define input hook props
+  const updatedErrors = [...errors];
+  if (hook) hook.errors.forEach(e => updatedErrors.push(e));
 
+  const confirmedProps = {
+    name: name ?? hook?.name,
+    id: id ?? hook?.name,
+    type: type ?? "text",
+    value: value ?? ( hook ? String(hook?.value) : undefined),
+    required: required ?? ( hook ? hook?.isRequired : false),
+    errors: updatedErrors,
+    onChange: onChange ?? hook?.onChange,
+    onBlur: onBlur ?? hook?.onBlur,
+  }
+
+  const isError: boolean = hideErrors ? false : confirmedProps.errors.length > 0;
   const isSelect: boolean = options.length > 0;
   const isCheckbox: boolean = type === "checkbox" && !isSelect;
   const isTextArea: boolean = type === "textarea" && !isSelect;
 
-  let input = <input type={type} disabled={disabled} { ...props } />;
+  let input = <input 
+    name={confirmedProps.name} 
+    id={confirmedProps.id} 
+    value={confirmedProps.value} 
+    onChange={confirmedProps.onChange} 
+    onBlur={confirmedProps.onBlur} 
+    type={confirmedProps.type} 
+    required={confirmedProps.required}
+    disabled={disabled} 
+    { ...props } 
+  />;
+  
   if (isTextArea) input = <textarea disabled={disabled}></textarea>;
   if (isSelect) input = <select disabled={disabled}>
     { options.map(opt => <option key={ opt }>{ opt }</option>) }
   </select>
   
   return <div className={`${disabled ? "disabled " : ""}input-container ${isError && "error"} ${className}`}>
-    { !isCheckbox && title && <label>{ title }</label> }
+    { !isCheckbox && title && !hideLabel && <label htmlFor={confirmedProps.id}>{`${title}${confirmedProps.required ? "*" : ""}`}</label> }
     { !isCheckbox && input }
 
     { isCheckbox && <div className="input-checkbox">
       { input }
-      <label>{ title }</label>
+      { !hideLabel && <label htmlFor={confirmedProps.id ?? ""}>{ title }</label> }
     </div> }
     
     { isError && <div>
-      { errors.map(e => <p className="error" key={e}>{ e }</p>) }
+      { confirmedProps.errors.map(e => <p className="error" key={e}>{ e }</p>) }
     </div> }
   </div>
 }

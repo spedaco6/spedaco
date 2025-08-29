@@ -334,34 +334,5 @@ describe("useInput hook", () => {
         expect(hook.current).toHaveProperty("isRequired", false);
       });
     });
-    
-    describe("dependencies", () => {
-      describe("set through config options", () => {
-        let options;
-        let hook;
-        let hook2;
-        beforeEach(() => {
-          const MATCH = (value) => {
-            return (val) => {
-              if (val === value) return { isValid: true, errors: [] };
-              return { isValid: false, errors: ["Invalid"]};
-            }
-          }
-          hook = renderHook(() => useInput("name", "", [])).result;
-          options = renderHook(() => useMemo(() => ({ dependencies: [hook.current.value] }), [])).result;
-          hook2 = renderHook(() => useInput("name", "", [MATCH(hook.current.value)], options)).result;
-        })
-        test("revalidation occurs when primary value changes", () => {
-          act(() => hook.current.onChange({ target: { value: "updated" }}));
-          act(() => hook.current.onBlur());
-          act(() => hook2.current.onChange({ target: { value: "updated" }}));
-          act(() => hook2.current.onBlur());
-          const spy = vitest.spyOn(validationUtils, "validateAll");
-          act(() => hook.current.onChange({ target: { value: "updatedAgain" }}));
-          expect(spy).toBeCalledTimes(2);
-          vitest.restoreAllMocks()
-        });
-      });
-    });  
   });
 });

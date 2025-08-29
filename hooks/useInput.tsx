@@ -10,8 +10,8 @@ export type UseInputReturn = {
   isRequired: boolean,
   touched: boolean,
   blurred: boolean,
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void,
-  onBlur: () => void,
+  onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  onBlur: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onReset: () => void,
 }
 
@@ -70,7 +70,15 @@ export default function useInput(
       return { isValid, errors: newErrors };
   }, [validation, options.required, value]);
 
-  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
+  const onChange: React.ChangeEventHandler<
+    HTMLInputElement | 
+    HTMLTextAreaElement | 
+    HTMLSelectElement
+    > = useCallback((e: React.ChangeEvent<
+    HTMLInputElement | 
+    HTMLTextAreaElement | 
+    HTMLSelectElement
+    >): void => {
     setCondition(prev => ({ ...prev, touched: true }));
     const { value: newValue } = e.target;
 
@@ -84,7 +92,11 @@ export default function useInput(
     });
   }, [validate, condition.blurred, options.enforceValidation]);
   
-  const onBlur = useCallback((): void => {
+  const onBlur: React.ChangeEventHandler<
+    HTMLInputElement | 
+    HTMLTextAreaElement | 
+    HTMLSelectElement
+    > = useCallback((): void => {
     // Validate only if input has been touched
     if (condition.touched) {
       // Updated blurred condition
