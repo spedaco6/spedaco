@@ -47,7 +47,7 @@ export const validationUtils = {
 export const IS_REQUIRED: ValidationFn = (initValue: unknown) => {
   const errors: string[] = [];
   const value = validationUtils.getString(initValue);
-  if (!value) errors.push("Value required");
+  if (!value) errors.push("This field cannot be left blank");
   return { isValid: errors.length === 0, errors };
 }
 
@@ -66,7 +66,7 @@ export const MIN = (min: number): ValidationFn => {
   return ( initValue: unknown ): Validity => {
     const errors = [];
     const value = validationUtils.getString(initValue);
-    if (value.length < min) errors.push(`Value must be at least ${min} character${min !== 1 && "s"} long.`);
+    if (value.length < min) errors.push(`Must be at least ${min} character${min !== 1 && "s"} long.`);
     return { isValid: errors.length === 0, errors };
   }
 }
@@ -75,7 +75,7 @@ export const MAX = (max: number): ValidationFn => {
   return ( initValue: unknown ): Validity => {
     const errors = [];
     const value = validationUtils.getString(initValue);
-    if (value.length > max) errors.push(`Value must not be greater than ${max} character${max !== 1 && "s"} long.`);
+    if (value.length > max) errors.push(`Must not be greater than ${max} character${max !== 1 && "s"} long.`);
     return { isValid: errors.length === 0, errors };
   }
 }
@@ -135,11 +135,8 @@ export const CONTAINS_NUMBER: ValidationFn = (initValue: unknown): Validity => {
 }
 
 // Validation Presets
-type ValidationPresets = Record<string, ValidationFn[] | ((value: unknown) => ValidationFn[])>;
+type ValidationPresets = Record<string, ValidationFn[]>;
 export const PRESETS: ValidationPresets = {
   EMAIL: [IS_EMAIL],
   PASSWORD: [MIN(8), CONTAINS_LC, CONTAINS_UC, CONTAINS_SPECIAL, CONTAINS_NUMBER],
-  PASSWORD_CONFIRM(value: unknown) {
-    return [MIN(8), CONTAINS_LC, CONTAINS_UC, CONTAINS_SPECIAL, CONTAINS_NUMBER, MATCHES(value)];
-  },
 }
