@@ -77,7 +77,7 @@ export default function Input({
       { !hideLabel && <label htmlFor={confirmedProps.id ?? ""}>{ title }</label> }
     </div> }
     
-    { isError && <div>
+    { isError && <div className="input-errors">
       { confirmedProps.errors.map(e => <p className="error" key={e}>{ e }</p>) }
     </div> }
   </div>

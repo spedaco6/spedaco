@@ -5,6 +5,15 @@
     margin-top: 1rem;
   }
 
+  .input-container p.error,
+  .input-container label {
+    font-size: small;
+  }
+
+  .input-container label {
+    text-transform: uppercase;
+  }
+
   .input-container input, 
   .input-container textarea, 
   .input-container select {
@@ -42,6 +51,10 @@
   .input-container.disabled label {
     color: var(--color-disabled);
     user-select: none;
+  }
+
+  .input-container .input-errors {
+    margin-top: .5rem;
   }
   
   .input-conatiner.disabled input,
