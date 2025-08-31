@@ -14,6 +14,10 @@
     text-transform: uppercase;
   }
 
+  .input-container input {
+    width: 100%;
+  }
+
   .input-container input, 
   .input-container textarea, 
   .input-container select {
