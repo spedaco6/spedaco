@@ -2,7 +2,7 @@ import React from "react";
 import "./Input.css";
 import { UseInputReturn } from "@/hooks/useInput";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
   title?: string,
   type?: string,
   options?: string[],
@@ -61,9 +61,19 @@ export default function Input({
     required={confirmedProps.required}
     disabled={disabled} 
     { ...props } 
-  />;
-  
-  if (isTextArea) input = <textarea disabled={disabled}></textarea>;
+    />;
+    
+    if (isTextArea) input = <textarea 
+    name={confirmedProps.name} 
+    id={confirmedProps.id} 
+    value={confirmedProps.value} 
+    onChange={confirmedProps.onChange}
+    onBlur={confirmedProps.onBlur} 
+    required={confirmedProps.required}
+    disabled={disabled} 
+  ></textarea>;
+
+
   if (isSelect) input = <select disabled={disabled}>
     { options.map(opt => <option key={ opt }>{ opt }</option>) }
   </select>
