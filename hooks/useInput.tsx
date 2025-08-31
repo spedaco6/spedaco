@@ -80,7 +80,6 @@ export default function useInput(
     >): void => {
     setCondition(prev => ({ ...prev, touched: true }));
     const { value: newValue } = e.target;
-
     const { isValid, errors: newErrors } = validate(newValue);
     // Update errors only if input has been blurred
     if (condition.blurred) setErrors(newErrors);

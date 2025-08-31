@@ -10,11 +10,7 @@
     font-size: small;
   }
 
-  .input-container label {
-    text-transform: uppercase;
-  }
-
-  .input-container input {
+  .input-container > input {
     width: 100%;
   }
 
@@ -35,6 +31,8 @@
   .input-container div.input-checkbox {
     display: flex;
     gap: .5rem;
+    align-items: center;
+    user-select: none;
   }
 
   /* Error Styles */

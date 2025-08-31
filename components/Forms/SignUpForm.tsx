@@ -12,7 +12,9 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const password: UseInputReturn = useInput("password*", "", VALID_PASS);
   const valid_confirm_pass = useMemo(() => ([MATCHES(password.value)]), [password.value]);
   const confirmPassword: UseInputReturn = useInput("confirmPassword*", "", valid_confirm_pass, { dependencies: [password.value] });
+  const type: UseInputReturn = useInput("type*", "");
   const notes: UseInputReturn = useInput("notes*", "");
+  const terms: UseInputReturn = useInput("terms*", false);
 
   return <Form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`}>
     <h2 className="text-2xl">Sign Up</h2>
@@ -23,7 +25,9 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
     <Input title="Email" hook={email} />
     <Input title="Password" type="password" hook={password} />
     <Input title="Password" type="password" hook={confirmPassword} />
-    <Input type="textarea" title="Notes" hook={notes} />
+    <Input title="Accept the terms and conditions" type="checkbox" hook={terms} />
+    <Input title="Notes" hook={notes} options={["", "new", "existing", "none"]} />
+    <Input type="textarea" title="Notes" hook={type} />
     <div className="flex justify-end m-2 mt-4">
       <button>Login</button>
     </div>
