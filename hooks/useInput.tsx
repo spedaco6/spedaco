@@ -58,12 +58,16 @@ export default function useInput(
 
   const validate = useCallback((newValue: unknown = value): Validity => {
       const { isValid, errors: returnedErrors } = validationUtils.validateAll(newValue, validation);
+      
       // Only setErrors if value is truthy or if it is required
-      const clearErrors = !newValue && !isRequired;
-      const newErrors = clearErrors ? [] : returnedErrors;
+      const hasDependencies: boolean = dependencyString.length > 0;
+      const hasValue: boolean = (newValue !== "" && newValue !== undefined && newValue !== null);
+      const shouldValidate = isRequired || hasDependencies || hasValue;
+      const newErrors = shouldValidate ? returnedErrors : [];
+      
       // Only setErrors if input has been blurred
       return { isValid, errors: newErrors };
-  }, [validation, isRequired, value]);
+  }, [validation, isRequired, value, dependencyString]);
 
   const onChange: React.ChangeEventHandler<
     HTMLInputElement | 

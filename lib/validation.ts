@@ -56,9 +56,7 @@ export const IS_EMAIL: ValidationFn = (initValue: unknown): Validity => {
   const email = validationUtils.getString(initValue); 
   const regex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9!#$%&'*+\-/=?^_`{|}~])*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
   const matches = email.match(regex);
-  if (!matches) {
-    errors.push("Invalid email address");
-  }
+  if (!matches) errors.push("Invalid email address");
   return { isValid: errors.length === 0, errors };
 }
 

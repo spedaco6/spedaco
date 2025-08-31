@@ -9,7 +9,7 @@ export default function LoginForm({ className="" }: React.PropsWithChildren<{ cl
   const email: UseInputReturn = useInput("email*", "", PRESETS.EMAIL);
   const password: UseInputReturn = useInput("password*", "", PRESETS.PASSWORD);
   const cp_validation = useMemo(() => ([MATCHES(password.value)]), [password.value]);
-  const confirmPassword: UseInputReturn = useInput("confirmPassword*", "", cp_validation, { dependencies: [password.value] });
+  const confirmPassword: UseInputReturn = useInput("confirmPassword", "", cp_validation, { dependencies: [password.value] });
 
   return <Form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`}>
     <h2 className="text-2xl">Login</h2>

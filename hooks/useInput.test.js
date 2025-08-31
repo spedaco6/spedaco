@@ -320,8 +320,6 @@ describe("useInput hook", () => {
         });
       });
     });
-
-
     describe("required", () => {
       test("sets isRequired to true", () => {
         const options = renderHook(() => useMemo(() => ({ required: true }), [])).result;
@@ -332,6 +330,96 @@ describe("useInput hook", () => {
         const options = renderHook(() => useMemo(() => ({ required: false }), [])).result;
         const hook = renderHook(() => useInput("name*", "", [], options.current)).result;
         expect(hook.current).toHaveProperty("isRequired", false);
+      });
+    });
+    describe("dependencies property", () => {
+      let hook;
+      let hook2;
+      let validation;
+      let rerender;
+      const match = (val1) => {
+        return (val2) => {
+          const errors = [];
+          if (val1 !== val2) errors.push("Values do not match");
+          return { isValid: errors.length === 0, errors };
+        };
+      }
+      beforeEach(() => {
+        hook = renderHook(() => useInput("name", ""));
+        const getValidation = () => ([match(hook.result.current.value)]);
+
+        const result = renderHook(
+          ({ validation, deps }) =>
+            useInput("name2", "", validation, { dependencies: deps }),
+          {
+            initialProps: {
+              validation: getValidation(),
+              deps: [hook.result.current.value],
+            },
+          }
+        );
+        hook2 = result;
+        validation = getValidation;
+        rerender = result.rerender;
+        
+        act(() => hook.result.current.onChange({ target: { value: "original" }}));
+        act(() => hook.result.current.onBlur());
+        act(() => hook2.result.current.onChange({ target: { value: "original" }}));
+        act(() => hook2.result.current.onBlur());
+      });
+      
+      test("input revalidates when primary becomes invalid", () => {
+        act(() => hook2.result.current.onChange({ target: { value: "updated" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        });
+        expect(hook2.result.current.errors).toHaveLength(1);
+        act(() => hook2.result.current.onChange({ target: { value: "original" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        })
+        expect(hook2.result.current.errors).toHaveLength(0);
+        act(() => hook2.result.current.onChange({ target: { value: "" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        })
+        expect(hook2.result.current.errors).toHaveLength(1);
+        act(() => hook2.result.current.onChange({ target: { value: "original" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        })
+        expect(hook2.result.current.errors).toHaveLength(0);
+      });
+
+      test("input revalidates when dependency becomes invalid", () => {
+        act(() => hook.result.current.onChange({ target: { value: "updated" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        });
+        expect(hook2.result.current.errors).toHaveLength(1);
+        act(() => hook.result.current.onChange({ target: { value: "original" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        })
+        expect(hook2.result.current.errors).toHaveLength(0);
+        act(() => hook.result.current.onChange({ target: { value: "" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        });
+        expect(hook2.result.current.errors).toHaveLength(1);
+        act(() => hook.result.current.onChange({ target: { value: "original" } }));
+        rerender({
+          validation: validation(),
+          deps: [hook.result.current.value],
+        })
+        expect(hook2.result.current.errors).toHaveLength(0);
       });
     });
   });
