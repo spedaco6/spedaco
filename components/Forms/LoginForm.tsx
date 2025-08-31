@@ -3,13 +3,13 @@ import React, { useMemo } from "react";
 import Form from "./Form";
 import Input from "../Input";
 import useInput, { UseInputReturn } from "@/hooks/useInput";
-import { MATCHES, PRESETS } from "@/lib/validation";
+import { MATCHES, VALID_EMAIL, VALID_PASS } from "@/lib/validation";
 
 export default function LoginForm({ className="" }: React.PropsWithChildren<{ className?: string }>): React.ReactElement {
-  const email: UseInputReturn = useInput("email*", "", PRESETS.EMAIL);
-  const password: UseInputReturn = useInput("password*", "", PRESETS.PASSWORD);
-  const cp_validation = useMemo(() => ([MATCHES(password.value)]), [password.value]);
-  const confirmPassword: UseInputReturn = useInput("confirmPassword", "", cp_validation, { dependencies: [password.value] });
+  const email: UseInputReturn = useInput("email*", "", VALID_EMAIL);
+  const password: UseInputReturn = useInput("password*", "", VALID_PASS);
+  const valid_confirm_pass = useMemo(() => ([MATCHES(password.value)]), [password.value]);
+  const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
 
   return <Form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`}>
     <h2 className="text-2xl">Login</h2>

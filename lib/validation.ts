@@ -133,8 +133,5 @@ export const CONTAINS_NUMBER: ValidationFn = (initValue: unknown): Validity => {
 }
 
 // Validation Presets
-type ValidationPresets = Record<string, ValidationFn[]>;
-export const PRESETS: ValidationPresets = {
-  EMAIL: [IS_EMAIL],
-  PASSWORD: [MIN(8), CONTAINS_LC, CONTAINS_UC, CONTAINS_SPECIAL, CONTAINS_NUMBER],
-}
+export const VALID_EMAIL: ValidationFn[] = [IS_EMAIL];
+export const VALID_PASS: ValidationFn[] = [MIN(8), CONTAINS_LC, CONTAINS_UC, CONTAINS_SPECIAL, CONTAINS_NUMBER];
