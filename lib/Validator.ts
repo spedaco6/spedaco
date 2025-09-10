@@ -1,6 +1,13 @@
 interface Validity { isValid: boolean, errors: string[] };
 type ValidationFn = ( value: unknown ) => Validity;
-
+interface PasswordOptions {
+  min?: number,
+  max?: number,
+  upper?: boolean,
+  lower?: boolean,
+  number?: boolean,
+  special?: boolean
+}
 
 export class Validator {
   private name: string;
@@ -43,6 +50,31 @@ export class Validator {
       const matches = email.match(regex);
       if (!matches) errors.push("Invalid email address");
     return { isValid: errors.length === 0, errors };
+  }
+
+  public static isPassword = (value: unknown, initOptions: PasswordOptions) => {
+    const options: Required<PasswordOptions> = {
+      min: 8,
+      max: Number.POSITIVE_INFINITY,
+      upper: true,
+      lower: true,
+      number: true,
+      special: true,
+      ...initOptions,
+    }
+    const result: Validity[] = [];
+    result.push(Validator.min(options.min)(value));
+    result.push(Validator.max(options.max)(value));
+    if (options.upper) result.push(Validator.hasUpper(value));
+    if (options.lower) result.push(Validator.hasLower(value));
+    if (options.number) result.push(Validator.hasNumber(value));
+    if (options.special) result.push(Validator.hasSpecial(value));
+
+    const final = Object.values(result).reduce((prev, current) => {
+      return { isValid: current.isValid && prev.isValid, errors: [...prev.errors, ...current.errors] };
+    }, { isValid: true, errors: [] } as Validity);
+    
+    return final;
   }
 
   public static hasUpper: ValidationFn = (value) => {
@@ -108,6 +140,12 @@ export class Validator {
 
   public isEmail(): this {
     const { isValid, errors } = Validator.isEmail(this.value);
+    if (!isValid) this.addErrors(errors);
+    return this.validate();
+  }
+
+  public isPassword(options: PasswordOptions): this {
+    const { isValid, errors } = Validator.isPassword(this.value, options);
     if (!isValid) this.addErrors(errors);
     return this.validate();
   }
