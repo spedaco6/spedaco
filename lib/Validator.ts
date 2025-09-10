@@ -171,25 +171,21 @@ export class Validator {
     return this.validate();
   }
 
-
-  public min: ((min: number) => ValidationFn) = (min) => {
-    return (value: unknown) => {
-      const errors: string[] = [];
-      return { isValid: errors.length === 0, errors };
-    }
+  public min(min: number): this {
+    const { isValid, errors } = Validator.min(min)(this.value);
+    if (!isValid) this.addErrors(errors);
+    return this.validate();
   }
-
-  public max: ((max: number) => ValidationFn) = (max) => {
-    return (value: unknown) => {
-      const errors: string[] = [];
-      return { isValid: errors.length === 0, errors };
-    }
+  
+  public max(max: number): this {
+    const { isValid, errors } = Validator.max(max)(this.value);
+    if (!isValid) this.addErrors(errors);
+    return this.validate();
   }
-
-  public matches: ((matches: unknown) => ValidationFn) = (matches) => {
-    return (value: unknown) => {
-      const errors: string[] = [];
-      return { isValid: errors.length === 0, errors };
-    }
+  
+  public matches(matchVal: unknown): this {
+    const { isValid, errors } = Validator.matches(matchVal)(this.value);
+    if (!isValid) this.addErrors(errors);
+    return this.validate();
   }
 }
