@@ -43,6 +43,21 @@ export class Validator {
   }
 
   // Static validation methods
+  public static validateAll(value: unknown, validationFns: ValidationFn[] = []): Validity {
+    const totalErrors: string[] = [];
+    let totalValidity = true;
+    for (const fn of validationFns) {
+      const { isValid, errors } = fn(value);
+      totalValidity = totalValidity && isValid;
+
+      // Only include errors if they are unique
+      for (const err of errors) {
+        if (!totalErrors.includes(err)) {
+          totalErrors.push(err);
+    } } }
+    return { isValid: totalValidity, errors: totalErrors };
+  }
+
   public static required: ValidationFn = (value) => {
     const errors: string[] = [];
     if (value === "" || value === null || value === undefined) errors.push("Value is required");
