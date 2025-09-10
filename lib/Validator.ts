@@ -12,6 +12,7 @@ interface PasswordOptions {
 export class Validator {
   private name: string;
   private value: unknown;
+  private stagedErrors: Record<string, string[]> = {};
   public errors: string[] = [];
   public isValid: boolean = true;
 
@@ -24,14 +25,19 @@ export class Validator {
   public getValue(): unknown { return this.value };
 
   // Private utility functions
-  private addErrors(errors: string[]): void {
+  private addErrors(errors: string[], field: string): void {
+    this.stagedErrors[field] = [];
     errors.forEach(e => {
       const custom = e.replace(/Value/, this.name);
-      if (!this.errors.includes(custom)) this.errors.push(custom);
+      if (!this.stagedErrors[field].includes(custom)) this.stagedErrors[field].push(custom);  
     });
   }
   
   private validate(): this {
+    const compiledErrors = Object
+      .values(this.stagedErrors)
+      .reduce((prev, current) => [...prev, ...current]);
+    this.errors = compiledErrors;
     this.isValid = this.errors.length === 0;
     return this;
   }
@@ -133,59 +139,59 @@ export class Validator {
 
   // Instance validation methods
   public required(): this {
-    const { isValid, errors } = Validator.required(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.required(this.value);
+    this.addErrors(errors, "required");
     return this.validate();
   }
 
   public isEmail(): this {
-    const { isValid, errors } = Validator.isEmail(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.isEmail(this.value);
+    this.addErrors(errors, "isEmail");
     return this.validate();
   }
 
   public isPassword(options: PasswordOptions): this {
-    const { isValid, errors } = Validator.isPassword(this.value, options);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.isPassword(this.value, options);
+    this.addErrors(errors, "isPassword");
     return this.validate();
   }
 
   public hasUpper(): this {
-    const { isValid, errors } = Validator.hasUpper(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.hasUpper(this.value);
+    this.addErrors(errors, "hasUpper");
     return this.validate();
   }
   public hasLower(): this {
-    const { isValid, errors } = Validator.hasLower(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.hasLower(this.value);
+    this.addErrors(errors, "hasLower");
     return this.validate();
   }
   public hasNumber(): this {
-    const { isValid, errors } = Validator.hasNumber(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.hasNumber(this.value);
+    this.addErrors(errors, "hasNumber");
     return this.validate();
   }
   public hasSpecial(): this {
-    const { isValid, errors } = Validator.hasSpecial(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.hasSpecial(this.value);
+    this.addErrors(errors, "hasSpecial");
     return this.validate();
   }
 
   public min(min: number): this {
-    const { isValid, errors } = Validator.min(min)(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.min(min)(this.value);
+    this.addErrors(errors, "min");
     return this.validate();
   }
   
   public max(max: number): this {
-    const { isValid, errors } = Validator.max(max)(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.max(max)(this.value);
+    this.addErrors(errors, "max");
     return this.validate();
   }
   
   public matches(matchVal: unknown): this {
-    const { isValid, errors } = Validator.matches(matchVal)(this.value);
-    if (!isValid) this.addErrors(errors);
+    const { errors } = Validator.matches(matchVal)(this.value);
+    this.addErrors(errors, "matches");
     return this.validate();
   }
 }
