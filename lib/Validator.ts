@@ -13,6 +13,7 @@ export class Validator {
   private name: string;
   private value: unknown;
   private stagedErrors: Record<string, string[]> = {};
+  private isRequired: boolean = false;
   public errors: string[] = [];
   public isValid: boolean = true;
 
@@ -37,7 +38,8 @@ export class Validator {
     const compiledErrors = Object
       .values(this.stagedErrors)
       .reduce((prev, current) => [...prev, ...current]);
-    this.errors = compiledErrors;
+    // Only return required error message if no other errors are included
+    this.errors = compiledErrors.length > 1 && this.isRequired ? compiledErrors.filter(e => e.includes("is required")) : compiledErrors;
     this.isValid = this.errors.length === 0;
     return this;
   }
@@ -154,6 +156,7 @@ export class Validator {
 
   // Instance validation methods
   public required(): this {
+    this.isRequired = true;
     const { errors } = Validator.required(this.value);
     this.addErrors(errors, "required");
     return this.validate();
