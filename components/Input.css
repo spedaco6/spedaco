@@ -35,6 +35,11 @@
     user-select: none;
   }
 
+  .input-container div.input-checkbox label,
+  .input-container div.input-checkbox input {
+    cursor: pointer;
+  }
+
   /* Error Styles */
   .input-container.error p.error, 
   .input-container.error label {
