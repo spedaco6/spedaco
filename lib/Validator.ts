@@ -1,6 +1,6 @@
-interface Validity { isValid: boolean, errors: string[] };
-type ValidationFn = ( value: unknown ) => Validity;
-interface PasswordOptions {
+export interface Validity { isValid: boolean, errors: string[] };
+export type ValidationFn = ( value: unknown ) => Validity;
+export interface PasswordOptions {
   min?: number,
   max?: number,
   upper?: boolean,
@@ -44,8 +44,22 @@ export class Validator {
     return this;
   }
 
-  // Static validation methods
-  public static validateAll(value: unknown, validationFns: ValidationFn[] = []): Validity {
+  // Trim input string and replace spaces with -
+  static trimAndDespace(name: string): string {
+    const dashedName = name.trim().split(" ").filter(seg => seg !== "").join("-");
+    return dashedName;
+  }
+
+  // Static utility methods
+  static removeAsterisk(initName: string): ({ name: string, isRequired: boolean }) { 
+    const name = Validator.trimAndDespace(initName);
+    const matches = name.match(/^(?<name>.+)\*$/);
+    const revName = matches?.groups?.name || name;
+    const isRequired = matches ? true : false;
+    return { name: revName, isRequired } 
+  }
+
+  static validateAll(value: unknown, validationFns: ValidationFn[] = []): Validity {
     const totalErrors: string[] = [];
     let totalValidity: boolean = true;
     for (const fn of validationFns) {
@@ -59,14 +73,15 @@ export class Validator {
     } } }
     return { isValid: totalValidity, errors: totalErrors };
   }
+  // Static validation methods
 
-  public static required: ValidationFn = (value) => {
+  static required: ValidationFn = (value) => {
     const errors: string[] = [];
     if (value === "" || value === null || value === undefined) errors.push("Value is required");
     return { isValid: errors.length === 0, errors };
   }
 
-  public static isEmail: ValidationFn = (value) => {
+  static isEmail: ValidationFn = (value) => {
     const errors: string[] = [];
     const email: string = String(value);
       const regex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9!#$%&'*+\-/=?^_`{|}~])*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
@@ -75,7 +90,7 @@ export class Validator {
     return { isValid: errors.length === 0, errors };
   }
 
-  public static isPassword = (value: unknown, initOptions: PasswordOptions) => {
+  static isPassword = (value: unknown, initOptions: PasswordOptions) => {
     const options: Required<PasswordOptions> = {
       min: 8,
       max: Number.POSITIVE_INFINITY,
@@ -100,28 +115,28 @@ export class Validator {
     return final;
   }
 
-  public static hasUpper: ValidationFn = (value) => {
+  static hasUpper: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
     const matches = strVal.match(/^.*[A-Z]+.*$/);
     if (!matches) errors.push("Value must contain an uppercase character");
     return { isValid: errors.length === 0, errors };
   }
-  public static hasLower: ValidationFn = (value) => {
+  static hasLower: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
     const matches = strVal.match(/^.*[a-z]+.*$/);
     if (!matches) errors.push("Value must contain an lowercase character");
     return { isValid: errors.length === 0, errors };
   }
-  public static hasNumber: ValidationFn = (value) => {
+  static hasNumber: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
     const matches = strVal.match(/^.*[0-9]+.*$/);
     if (!matches) errors.push("Value must contain a number");
     return { isValid: errors.length === 0, errors };
   }
-  public static hasSpecial: ValidationFn = (value) => {
+  static hasSpecial: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
     const matches = strVal.match(/^.*[^0-9A-Za-z\s]+.*$/);
@@ -129,7 +144,7 @@ export class Validator {
     return { isValid: errors.length === 0, errors };
   }
 
-  public static min: ((min: number) => ValidationFn) = (min = 0) => {
+  static min: ((min: number) => ValidationFn) = (min = 0) => {
     return (value: unknown) => {
       const errors: string[] = [];
       if (typeof value === "string" && value.length < min) errors.push(`Value must be at least ${min} character${min === 1 ? "" : "s" }`);
@@ -137,7 +152,7 @@ export class Validator {
       return { isValid: errors.length === 0, errors };
     }
   }
-  public static max: ((max: number) => ValidationFn) = (max = Number.POSITIVE_INFINITY) => {
+  static max: ((max: number) => ValidationFn) = (max = Number.POSITIVE_INFINITY) => {
     return (value: unknown) => {
       const errors: string[] = [];
       if (typeof value === "string" && value.length > max) errors.push(`Value must not be greater than ${max} character${max === 1 ? "" : "s" }`);
@@ -146,7 +161,7 @@ export class Validator {
     }
   }
 
-  public static matches: ((match: unknown) => ValidationFn) = (match) => {
+  static matches: ((match: unknown) => ValidationFn) = (match) => {
     return (value: unknown) => {
       const errors: string[] = [];
       if (value !== match) errors.push("Value does not match");

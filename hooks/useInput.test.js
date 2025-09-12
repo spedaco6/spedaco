@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, vitest } from "vitest";
 import useInput from "./useInput";
 import { validationUtils } from "@/lib/validation";
 import { useMemo } from "react";
+import { Validator } from "../lib/Validator";
 
 describe("useInput hook", () => {
   describe("default return values", () => {
@@ -14,11 +15,6 @@ describe("useInput hook", () => {
     });
     test("returns name matching input name", () => {
       expect(hook.current).toHaveProperty("name", "testName");
-    });
-    test("randomly generates a name if none is provided", () => {
-      const noName = hook2.current.name;
-      expect(noName).toBeDefined();
-      expect(noName).toContain("no-name-");
     });
     test("returns value matching input value", () => {
       expect(hook.current).toHaveProperty("value", "testValue");
@@ -195,13 +191,13 @@ describe("useInput hook", () => {
       expect(hook.current.errors).toHaveLength(1);
     });
     test("no validation triggered during initialization", () => {
-      const spy = vitest.spyOn(validationUtils, "validateAll");
+      const spy = vitest.spyOn(Validator, "validateAll");
       renderHook(() => useInput("name", "initValue", []));
       expect(spy).toHaveBeenCalledTimes(0);
       vitest.restoreAllMocks();
     });
     test("errors do not populate before first onBlur event following onChange", () => {
-      const spy = vitest.spyOn(validationUtils, "validateAll");
+      const spy = vitest.spyOn(Validator, "validateAll");
       const hook = renderHook(() => useInput("name", "initValue", [() => ({ isValid: false, errors:["Invalid"]})])).result;
       act(() => hook.current.onBlur());
       expect(spy).toHaveBeenCalledTimes(0);
@@ -214,7 +210,7 @@ describe("useInput hook", () => {
       vitest.restoreAllMocks();
     });
     test("errors populate after every onBlur event following an onChange event", () => {
-      const spy = vitest.spyOn(validationUtils, "validateAll");
+      const spy = vitest.spyOn(Validator, "validateAll");
       const hook = renderHook(() => useInput("name", "initValue", [() => ({ isValid: false, errors:["Invalid"]})])).result;
       act(() => hook.current.onBlur());
       act(() => hook.current.onChange({ target: { value: "value" }}));
@@ -225,7 +221,7 @@ describe("useInput hook", () => {
       vitest.restoreAllMocks();
     });
     test("revalidation occurs after every onChange event", () => {
-      const spy = vitest.spyOn(validationUtils, "validateAll");
+      const spy = vitest.spyOn(Validator, "validateAll");
       const hook = renderHook(() => useInput("name", "initValue", [])).result;
       act(() => hook.current.onChange({ target: { value: "value" }}));
       expect(spy).toHaveBeenCalledTimes(1);

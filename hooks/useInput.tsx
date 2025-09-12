@@ -1,6 +1,6 @@
 "use client"
 
-import { IS_REQUIRED, ValidationFn, validationUtils, Validity } from "@/lib/validation"
+import { Validator, ValidationFn, Validity } from "@/lib/Validator";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type UseInputReturn = {
@@ -36,13 +36,13 @@ export default function useInput(
   initOptions: UseInputOptionsInput = {}
 ): UseInputReturn {
   // Check if name contains trailing asterisk
-  const result: { name: string, isRequired: boolean } = validationUtils.removeAsterisk(initName);
+  const result: { name: string, isRequired: boolean } = Validator.removeAsterisk(initName);
   const { name } = result;
   const isRequired: boolean = initOptions?.required ?? result.isRequired;
 
   // Update validationFns
   const validation: ValidationFn[] = useMemo((): ValidationFn[] => {
-    if (isRequired && initValidation.length === 0) return [...initValidation, IS_REQUIRED];
+    if (isRequired && initValidation.length === 0) return [...initValidation, Validator.required];
     return [...initValidation];
   }, [initValidation, isRequired]);
   
@@ -57,7 +57,7 @@ export default function useInput(
   const dependencyString: string = initOptions?.dependencies ? "d:" + initOptions?.dependencies?.join(",") : "";
 
   const validate = useCallback((newValue: unknown = value): Validity => {
-      const { isValid, errors: returnedErrors } = validationUtils.validateAll(newValue, validation);
+      const { isValid, errors: returnedErrors } = Validator.validateAll(newValue, validation);
       
       // Only setErrors if value is truthy or if it is required
       const hasDependencies: boolean = dependencyString.length > 0;
@@ -78,18 +78,19 @@ export default function useInput(
     HTMLTextAreaElement | 
     HTMLSelectElement
     >): void => {
-    setCondition(prev => ({ ...prev, touched: true }));
+    // Update input condtion.touched to true
+    if (!condition.touched) setCondition(prev => ({ ...prev, touched: true }));
+    // Check if input is tracking boolean values
+    const isBoolean = typeof initValue === "boolean";
     const { value: newValue } = e.target;
     const { isValid, errors: newErrors } = validate(newValue);
     // Update errors only if input has been blurred
     if (condition.blurred) setErrors(newErrors);
-
     setValue(prev => {
       if (enforceValidation === "hard" && !isValid) return prev;
       return newValue;
     });
-
-  }, [validate, condition.blurred, enforceValidation]);
+  }, [validate, condition, enforceValidation, initValue]);
   
   const onBlur: React.ChangeEventHandler<
     HTMLInputElement | 
