@@ -35,7 +35,7 @@ export class Validator {
   }
   
   private validate(): this {
-    const compiledErrors = Object
+    const compiledErrors: string[] = Object
       .values(this.stagedErrors)
       .reduce((prev, current) => [...prev, ...current]);
     // Only return required error message if no other errors are included
@@ -47,7 +47,7 @@ export class Validator {
   // Static validation methods
   public static validateAll(value: unknown, validationFns: ValidationFn[] = []): Validity {
     const totalErrors: string[] = [];
-    let totalValidity = true;
+    let totalValidity: boolean = true;
     for (const fn of validationFns) {
       const { isValid, errors } = fn(value);
       totalValidity = totalValidity && isValid;
@@ -68,7 +68,7 @@ export class Validator {
 
   public static isEmail: ValidationFn = (value) => {
     const errors: string[] = [];
-    const email = String(value);
+    const email: string = String(value);
       const regex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9!#$%&'*+\-/=?^_`{|}~])*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
       const matches = email.match(regex);
       if (!matches) errors.push("Invalid email address");
@@ -103,28 +103,28 @@ export class Validator {
   public static hasUpper: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
-    const matches = strVal.match(/^.*[A-Z].*$/);
+    const matches = strVal.match(/^.*[A-Z]+.*$/);
     if (!matches) errors.push("Value must contain an uppercase character");
     return { isValid: errors.length === 0, errors };
   }
   public static hasLower: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
-    const matches = strVal.match(/^.*[a-z].*$/);
+    const matches = strVal.match(/^.*[a-z]+.*$/);
     if (!matches) errors.push("Value must contain an lowercase character");
     return { isValid: errors.length === 0, errors };
   }
   public static hasNumber: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
-    const matches = strVal.match(/^.*[0-9].*$/);
+    const matches = strVal.match(/^.*[0-9]+.*$/);
     if (!matches) errors.push("Value must contain a number");
     return { isValid: errors.length === 0, errors };
   }
   public static hasSpecial: ValidationFn = (value) => {
     const errors: string[] = [];
     const strVal = String(value);
-    const matches = strVal.match(/^.*[^0-9A-Za-z\s].*$/);
+    const matches = strVal.match(/^.*[^0-9A-Za-z\s]+.*$/);
     if (!matches) errors.push("Value must contain a number");
     return { isValid: errors.length === 0, errors };
   }
