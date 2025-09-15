@@ -80,7 +80,7 @@ describe("Input component", () => {
         expect(label).toBeInTheDocument();
         const position = input.compareDocumentPosition(label);
         const inputFirst = position & Node.DOCUMENT_POSITION_FOLLOWING;
-        expect(inputFirst).toBeTruthy;
+        expect(inputFirst).toBeTruthy();
         expect(input).toHaveAttribute("type", "checkbox");
       });
       test("options returns a <select> element", () => {

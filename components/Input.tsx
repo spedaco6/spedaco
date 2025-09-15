@@ -71,7 +71,7 @@ export default function Input({
     type={confirmedProps.type} 
     required={confirmedProps.required}
     value={confirmedProps.value}
-    checked={confirmedProps.value === "true"}
+    checked={confirmedProps.value ? confirmedProps.value === "true" : undefined}
     disabled={disabled} 
     { ...props } 
     />;
