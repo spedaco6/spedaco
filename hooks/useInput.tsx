@@ -52,7 +52,7 @@ export default function useInput(
   const [ prevValue, setPrevValue ] = useState<string | number | boolean>(initValue);
   const [ value, setValue ] = useState<string | number | boolean>(initValue);
   const [ errors, setErrors ] = useState<string[]>([]);
-  const [ condition, setCondition ] = useState<InputCondition>({ blurred: false, touched: false });
+  const [ condition, setCondition ] = useState<InputCondition>({ blurred: !!initValue, touched: false });
 
   // Extract options configuration
   const enforceValidation: "none"| "soft" | "hard" = initOptions?.enforceValidation ?? "none";

@@ -43,10 +43,12 @@ describe("useInput hook", () => {
       expect(hook2.current.touched).toBeFalsy();
     });
     test("returns false blurred property", () => {
-      expect(hook.current).toHaveProperty("blurred");
-      expect(hook.current.blurred).toBeFalsy();
       expect(hook2.current).toHaveProperty("blurred");
-      expect(hook2.current.blurred).toBeFalsy();
+      expect(hook2.current.blurred).toBe(false);
+    });
+    test("returns true blurred property when value is provided", () => {
+      expect(hook.current).toHaveProperty("blurred");
+      expect(hook.current.blurred).toBe(true);
     });
     test("returns onChange event handler", () => {
       expect(hook.current).toHaveProperty("onChange");
@@ -223,7 +225,7 @@ describe("useInput hook", () => {
     });
     test("errors do not populate before first onBlur event following onChange", () => {
       const spy = vitest.spyOn(Validator, "validateAll");
-      const hook = renderHook(() => useInput("name", "initValue", [() => ({ isValid: false, errors:["Invalid"]})])).result;
+      const hook = renderHook(() => useInput("name", "", [() => ({ isValid: false, errors:["Invalid"]})])).result;
       act(() => hook.current.onBlur());
       expect(spy).toHaveBeenCalledTimes(0);
       expect(hook.current).toHaveProperty("errors");
