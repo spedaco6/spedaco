@@ -90,7 +90,33 @@ export class Validator {
     return { isValid: errors.length === 0, errors };
   }
 
-  static isPassword = (value: unknown, initOptions: PasswordOptions) => {
+  static isPassword: ((options?: PasswordOptions) => ValidationFn) = (initOptions: PasswordOptions = {}) => {
+    return (value: unknown) => {      
+      const options: Required<PasswordOptions> = {
+        min: 8,
+        max: Number.POSITIVE_INFINITY,
+        upper: true,
+        lower: true,
+        number: true,
+        special: true,
+        ...initOptions,
+      }
+      const result: Validity[] = [];
+      result.push(Validator.min(options.min)(value));
+      result.push(Validator.max(options.max)(value));
+      if (options.upper) result.push(Validator.hasUpper(value));
+      if (options.lower) result.push(Validator.hasLower(value));
+      if (options.number) result.push(Validator.hasNumber(value));
+      if (options.special) result.push(Validator.hasSpecial(value));
+
+      const final = Object.values(result).reduce((prev, current) => {
+        return { isValid: current.isValid && prev.isValid, errors: [...prev.errors, ...current.errors] };
+      }, { isValid: true, errors: [] });
+      
+      return final;
+    }
+  } 
+  /* static isPassword = (value: unknown, initOptions: PasswordOptions) => {
     const options: Required<PasswordOptions> = {
       min: 8,
       max: Number.POSITIVE_INFINITY,
@@ -113,7 +139,7 @@ export class Validator {
     }, { isValid: true, errors: [] } as Validity);
     
     return final;
-  }
+  } */
 
   static hasUpper: ValidationFn = (value) => {
     const errors: string[] = [];
@@ -184,7 +210,7 @@ export class Validator {
   }
 
   public isPassword(options: PasswordOptions): this {
-    const { errors } = Validator.isPassword(this.value, options);
+    const { errors } = Validator.isPassword(options)(this.value);
     this.addErrors(errors, "isPassword");
     return this.validate();
   }

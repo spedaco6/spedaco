@@ -31,7 +31,7 @@
   .input-container div.input-checkbox {
     display: flex;
     gap: .5rem;
-    align-items: center;
+    align-items: first baseline;
     user-select: none;
   }
 
