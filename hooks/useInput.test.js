@@ -149,13 +149,9 @@ describe("useInput hook", () => {
     });
     test("will return errors when value is required and boolean false", () => {
       const hook = renderHook(() => useInput("terms*", false));
-      console.log(hook.result.current);
       act(() => hook.result.current.onChange());
-      console.log(hook.result.current);
       act(() => hook.result.current.onBlur());
-      console.log(hook.result.current);
       act(() => hook.result.current.onChange());
-      console.log(hook.result.current);
       expect(hook.result.current.errors).toHaveLength(1);
     });
   });
@@ -445,6 +441,35 @@ describe("useInput hook", () => {
           deps: [hook.result.current.value],
         })
         expect(hook2.result.current.errors).toHaveLength(0);
+      });
+    });
+    describe("message property", () => {
+      test("has no effect when not provided", () => {
+        const hook = renderHook(() => useInput("test*", ""));
+        const hook2 = renderHook(() => useInput("test*", false));
+        act(() => hook.result.current.onChange({ target: { value: "change" }}));
+        act(() => hook.result.current.onBlur());
+        act(() => hook.result.current.onChange({ target: { value: "" }}));
+        act(() => hook2.result.current.onChange()); 
+        act(() => hook2.result.current.onBlur());
+        act(() => hook2.result.current.onChange());
+        expect(hook.result.current.errors.includes("Value is required")).toBe(true);
+        expect(hook2.result.current.errors.includes("Value is required")).toBe(true);
+      });
+      test("overrides other error messages", () => {
+        const hook = renderHook(() => useInput("test*", "", [], { message: "I expect hook to have this error message" }));
+        const hook2 = renderHook(() => useInput("test*", false, [], { message: "I expect hook2 to have this error message" }));
+        act(() => hook.result.current.onChange({ target: { value: "change" }}));
+        act(() => hook.result.current.onBlur());
+        act(() => hook.result.current.onChange({ target: { value: "" }}));
+        act(() => hook2.result.current.onChange()); 
+        act(() => hook2.result.current.onBlur());
+        act(() => hook2.result.current.onChange());
+        console.log(hook.result.current.errors.includes("Value is required"));
+        expect(hook.result.current.errors.includes("Value is required")).toBe(false);
+        expect(hook2.result.current.errors.includes("Value is required")).toBe(false);
+        expect(hook.result.current.errors.includes("I expect hook to have this error message")).toBe(true);
+        expect(hook2.result.current.errors.includes("I expect hook2 to have this error message")).toBe(true);
       });
     });
   });

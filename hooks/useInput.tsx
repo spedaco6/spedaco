@@ -27,6 +27,7 @@ export interface UseInputOptionsInput {
   enforceValidation?: "none" | "soft" | "hard",
   required?: boolean,
   dependencies?: (string | number | boolean)[],
+  message?: string,
 }
 
 export default function useInput(
@@ -57,6 +58,7 @@ export default function useInput(
   const enforceValidation: "none"| "soft" | "hard" = initOptions?.enforceValidation ?? "none";
   const dependencyString: string = initOptions?.dependencies ? "d:" + initOptions?.dependencies?.join(",") : "";
   const isBoolean = typeof initValue === "boolean";
+  const message = initOptions.message ?? "";
 
   const validate = useCallback((newValue: unknown = value): Validity => {
 
@@ -66,11 +68,13 @@ export default function useInput(
     const hasDependencies: boolean = dependencyString.length > 0;
     const hasValue: boolean = (newValue !== "" && newValue !== undefined && newValue !== null);
     const shouldValidate = isRequired || hasDependencies || hasValue;
-    const newErrors = shouldValidate ? returnedErrors : [];
+    // Override errors with default options message
+    const errorMessage = (message && !isValid) ? [ message ] : returnedErrors;
+    const newErrors = shouldValidate ? errorMessage : [];
       
       // Only setErrors if input has been blurred
       return { isValid, errors: newErrors };
-  }, [validation, isRequired, value, dependencyString]);
+  }, [validation, isRequired, value, dependencyString, message]);
 
   const onChange: React.ChangeEventHandler<
     HTMLInputElement | 

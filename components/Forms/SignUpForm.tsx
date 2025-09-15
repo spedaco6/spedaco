@@ -14,7 +14,7 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const confirmPassword: UseInputReturn = useInput("confirmPassword*", "", valid_confirm_pass, { dependencies: [password.value] });
   const type: UseInputReturn = useInput("type*", "");
   const notes: UseInputReturn = useInput("notes*", "");
-  const terms: UseInputReturn = useInput("terms*", false);
+  const terms: UseInputReturn = useInput("terms*", false, [], { message: "Terms and conditions must be accepted"});
 
   return <Form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`}>
     <h2 className="text-2xl">Sign Up</h2>
