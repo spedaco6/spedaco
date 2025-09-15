@@ -149,6 +149,10 @@ describe("useInput hook", () => {
       act(() => hook.result.current.onBlur());
       expect(hook.result.current.errors).toHaveLength(0);
     });
+    test("have blurred set to true by default", () => {
+      const hook = renderHook(() => useInput("terms*", false));
+      expect(hook.result.current.blurred).toBe(true);
+    });
     test("will return errors when value is required and boolean false", () => {
       const hook = renderHook(() => useInput("terms*", false));
       act(() => hook.result.current.onChange({ target: { checked: true}}));
