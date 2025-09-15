@@ -120,18 +120,15 @@ export default function useInput(
 
   // onToggle will be used for boolean values
   const onToggle: React.ChangeEventHandler<
-    HTMLInputElement |
-    HTMLTextAreaElement |
-    HTMLSelectElement
-    > = useCallback((): void => {
+    HTMLInputElement
+    > = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+      const { checked } = e.target;
       if (!condition.touched) setCondition(prev => ({ ...prev, touched: true }));
-      setValue(prev => {
-        // Update input condtion.touched to true        
-        const { errors: newErrors } = validate(!prev);
-        // Update errors only if input has been blurred
-        if (condition.blurred) setErrors(newErrors);
-        return !prev
-      });
+      // Update input condtion.touched to true        
+      const { errors: newErrors } = validate(checked);
+      // Update errors only if input has been blurred
+      if (condition.blurred) setErrors(newErrors);
+      setValue(checked);
   }, [validate, condition]);
 
 

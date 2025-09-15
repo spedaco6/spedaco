@@ -1,11 +1,10 @@
 import React from "react";
-import { render, renderHook, screen, within } from "@testing-library/react";
+import { render, renderHook, screen, within, act } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import Input from "./Input";
 import useInput from "../hooks/useInput";
 
 describe("Input component", () => {
-  
   describe("Default conditions", () => {
     describe("No title provided", () => {
       test("input-container is in document", () => {
@@ -163,6 +162,129 @@ describe("Input component", () => {
       const label2 = document.querySelector("label");
       expect(label2).toBeInTheDocument();
       expect(label2).toHaveAttribute("for", "testName");
-    })
+    });
+    describe("input reflects initial useInput values", () => {
+      test("text input value", async () => {
+        const hook = renderHook(() => useInput("testName*", "I already have a value"));
+        render(<Input hook={hook.result.current} />);
+        const input = document.querySelector("input");
+        expect(input).toHaveValue("I already have a value");
+      });
+      describe("checkbox boolean values", () => {
+        test("box is checked when true", () => {
+          const hook = renderHook(() => useInput("testName*", true));
+          render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = document.querySelector("input");
+          expect(input).toBeChecked();
+        });
+        test("box is unchecked when false", () => {
+          const hook = renderHook(() => useInput("testName*", false));
+          render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = document.querySelector("input");
+          expect(input).not.toBeChecked();
+        });
+        test("is unchecked when null", () => {
+          const hook = renderHook(() => useInput("testName*", null));
+          render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = document.querySelector("input");
+          expect(input).not.toBeChecked();
+        });
+        test("is unchecked when text value", () => {
+          const hook = renderHook(() => useInput("testName*", "value"));
+          render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = document.querySelector("input");
+          expect(input).not.toBeChecked();
+        });
+        test("is checked/unchecked onChange when initial value is true", () => {
+          const hook = renderHook(() => useInput("testName*", true));
+          const { rerender } = render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = document.querySelector("input");
+          expect(input).toBeChecked();
+          act(() => hook.result.current.onChange({ target: { checked: false }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          expect(input).not.toBeChecked();
+          expect(hook.result.current.errors).toHaveLength(1);
+          act(() => hook.result.current.onChange({ target: { checked: true }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          expect(input).toBeChecked();
+          expect(hook.result.current.errors).toHaveLength(0);
+        });
+        test("is checked/unchecked onChange when initial value is false", () => {
+          const hook = renderHook(() => useInput("testName*", false));
+          const { rerender } = render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = document.querySelector("input");
+          expect(input).not.toBeChecked();
+          
+          act(() => hook.result.current.onChange({ target: { checked: true }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          expect(input).toBeChecked();
+          
+          act(() => hook.result.current.onChange({ target: { checked: false }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          expect(input).not.toBeChecked();
+          
+          act(() => hook.result.current.onChange({ target: { checked: true }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          expect(input).toBeChecked();
+          
+          act(() => hook.result.current.onChange({ target: { checked: false }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          expect(input).not.toBeChecked();
+        });
+
+        test.only("displays errors only when invalid when initial is true", () => {
+          const hook = renderHook(() => useInput("testName*", true, [(value) => ({ isValid: value, errors: value ? [] : ["Required value"]})]));
+          const { rerender } = render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = screen.getByRole("checkbox");
+          
+          act(() => hook.result.current.onChange({ target: { checked: false }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          const error = screen.getByText("Required value");
+          expect(error).toBeInTheDocument();
+          expect(hook.result.current.errors).toHaveLength(1);
+          expect(input).not.toBeChecked();
+          
+          act(() => hook.result.current.onChange({ target: { checked: true }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          const error2 = screen.queryByText("Required value");
+          expect(error2).not.toBeInTheDocument();
+          expect(hook.result.current.errors).toHaveLength(0);
+          expect(input).toBeChecked();
+        });
+
+        test.only("displays errors only when invalid when initial is false", () => {
+          const hook = renderHook(() => useInput("testName*", false, [(value) => ({ isValid: value, errors: value ? [] : ["Required value"]})]));
+          const { rerender } = render(<Input hook={hook.result.current} type="checkbox" />);
+          const input = screen.getByRole("checkbox");
+          
+          act(() => hook.result.current.onChange({ target: { checked: true }}));
+          act(() => hook.result.current.onBlur());
+          rerender(<Input hook={hook.result.current} type="checkbox" />);
+          const error = screen.queryByText("Required value");
+          expect(error).not.toBeInTheDocument();
+          expect(hook.result.current.errors).toHaveLength(0);
+          expect(input).toBeChecked();
+          
+          act(() => hook.result.current.onChange({ target: { checked: false }}));
+          rerender(<Input hook={hook.result.current} type="checkbox" />)
+          const error2 = screen.getByText("Required value");
+          expect(error2).toBeInTheDocument();
+          expect(hook.result.current.errors).toHaveLength(1);
+          expect(input).not.toBeChecked();
+        });
+      });
+      test("when provided a text textarea value", () => {
+        const hook = renderHook(() => useInput("testName*", "I already have a value"));
+        render(<Input hook={hook.result.current} type="textarea" />);
+        const input = document.querySelector("textarea");
+        expect(input).toHaveValue("I already have a value");
+      });
+      test("when provided a text select value", () => {
+        const hook = renderHook(() => useInput("testName*", "Selected"));
+        render(<Input hook={hook.result.current} options={ ["", "Not selected", "Selected"] } />);
+        const input = document.querySelector("select");
+        expect(input).toHaveValue("Selected");
+      });
+    });
   });
 });

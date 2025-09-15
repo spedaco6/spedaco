@@ -138,22 +138,22 @@ describe("useInput hook", () => {
     });
     test("will be inverted onChange", () => {
       const hook = renderHook(() => useInput("test", true));
-      act(() => hook.result.current.onChange());
+      act(() => hook.result.current.onChange({ target: { checked: false }}));
       expect(hook.result.current.value).toBe(false);
-      act(() => hook.result.current.onChange());
+      act(() => hook.result.current.onChange({ target: { checked: true }}));
       expect(hook.result.current.value).toBe(true);
     });
     test("will return no errors when value is required and boolean true", () => {
       const hook = renderHook(() => useInput("terms*", false));
-      act(() => hook.result.current.onChange());
+      act(() => hook.result.current.onChange({ target: { checked: true}}));
       act(() => hook.result.current.onBlur());
       expect(hook.result.current.errors).toHaveLength(0);
     });
     test("will return errors when value is required and boolean false", () => {
       const hook = renderHook(() => useInput("terms*", false));
-      act(() => hook.result.current.onChange());
+      act(() => hook.result.current.onChange({ target: { checked: true}}));
       act(() => hook.result.current.onBlur());
-      act(() => hook.result.current.onChange());
+      act(() => hook.result.current.onChange({ target: { checked: false}}));
       expect(hook.result.current.errors).toHaveLength(1);
     });
   });
@@ -452,9 +452,9 @@ describe("useInput hook", () => {
         act(() => hook.result.current.onChange({ target: { value: "change" }}));
         act(() => hook.result.current.onBlur());
         act(() => hook.result.current.onChange({ target: { value: "" }}));
-        act(() => hook2.result.current.onChange()); 
+        act(() => hook2.result.current.onChange({ target: { checked: true }})); 
         act(() => hook2.result.current.onBlur());
-        act(() => hook2.result.current.onChange());
+        act(() => hook2.result.current.onChange({ target: { checked: false }}));
         expect(hook.result.current.errors.includes("Value is required")).toBe(true);
         expect(hook2.result.current.errors.includes("Value is required")).toBe(true);
       });
@@ -464,9 +464,9 @@ describe("useInput hook", () => {
         act(() => hook.result.current.onChange({ target: { value: "change" }}));
         act(() => hook.result.current.onBlur());
         act(() => hook.result.current.onChange({ target: { value: "" }}));
-        act(() => hook2.result.current.onChange()); 
+        act(() => hook2.result.current.onChange({ target: { checked: true }})); 
         act(() => hook2.result.current.onBlur());
-        act(() => hook2.result.current.onChange());
+        act(() => hook2.result.current.onChange({ target: { checked: false }}));
         expect(hook.result.current.errors.includes("Value is required")).toBe(false);
         expect(hook2.result.current.errors.includes("Value is required")).toBe(false);
         expect(hook.result.current.errors.includes("I expect hook to have this error message")).toBe(true);
@@ -479,10 +479,10 @@ describe("useInput hook", () => {
         act(() => hook.result.current.onBlur());
         act(() => hook.result.current.onChange({ target: { value: "" }}));
         act(() => hook.result.current.onChange({ target: { value: "change" }}));
-        act(() => hook2.result.current.onChange()); 
+        act(() => hook2.result.current.onChange({ target: { checked: true }})); 
         act(() => hook2.result.current.onBlur());
-        act(() => hook2.result.current.onChange());
-        act(() => hook2.result.current.onChange());
+        act(() => hook2.result.current.onChange({ target: { checked: false }}));
+        act(() => hook2.result.current.onChange({ target: { checked: true }}));
         expect(hook.result.current.errors).toHaveLength(0);
         expect(hook2.result.current.errors).toHaveLength(0);
       });

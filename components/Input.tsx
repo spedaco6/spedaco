@@ -33,7 +33,7 @@ export default function Input({
 }: React.PropsWithChildren<InputProps>): React.ReactElement {;
   // Define input hook props
   const updatedErrors = [...errors];
-  if (hook) hook.errors.forEach(e => updatedErrors.push(e));
+  if (hook) hook.errors?.forEach(e => updatedErrors.push(e));
 
   const confirmedProps = {
     name: name ?? hook?.name,
@@ -59,6 +59,19 @@ export default function Input({
     onBlur={confirmedProps.onBlur} 
     type={confirmedProps.type} 
     required={confirmedProps.required}
+    disabled={disabled} 
+    { ...props } 
+    />;
+
+    if (isCheckbox) input = <input 
+    name={confirmedProps.name} 
+    id={confirmedProps.id} 
+    onChange={confirmedProps.onChange} 
+    onBlur={confirmedProps.onBlur} 
+    type={confirmedProps.type} 
+    required={confirmedProps.required}
+    value={confirmedProps.value}
+    checked={confirmedProps.value === "true"}
     disabled={disabled} 
     { ...props } 
     />;
@@ -88,7 +101,7 @@ export default function Input({
     { options.map(opt => <option key={ opt }>{ opt }</option>) }
   </select>
   
-  return <div className={`${disabled ? "disabled " : ""}input-container ${isError && "error"} ${className}`}>
+  return <div className={`${disabled ? "disabled " : ""}input-container${isError ? " error" : ""} ${className}`}>
     { !isCheckbox && title && !hideLabel && <label htmlFor={confirmedProps.id}>{`${title}${confirmedProps.required ? "*" : ""}`}</label> }
     { !isCheckbox && input }
 
