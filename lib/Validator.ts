@@ -77,7 +77,7 @@ export class Validator {
 
   static required: ValidationFn = (value) => {
     const errors: string[] = [];
-    if (value === "" || value === null || value === undefined) errors.push("Value is required");
+    if (value === "" || value === null || value === undefined || value === false) errors.push("Value is required");
     return { isValid: errors.length === 0, errors };
   }
 

@@ -1,7 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, vitest } from "vitest";
 import useInput from "./useInput";
-import { validationUtils } from "@/lib/validation";
 import { useMemo } from "react";
 import { Validator } from "../lib/Validator";
 
@@ -129,7 +128,37 @@ describe("useInput hook", () => {
       expect(hook.current).toHaveProperty("touched", false);
     });
   });
-  
+  describe("boolean values", () => {
+    test("will return boolean values", () => {
+      const hook = renderHook(() => useInput("test", true));
+      expect(typeof hook.result.current.value).toBe("boolean");
+      expect(hook.result.current.value).toBe(true);
+    });
+    test("will be inverted onChange", () => {
+      const hook = renderHook(() => useInput("test", true));
+      act(() => hook.result.current.onChange());
+      expect(hook.result.current.value).toBe(false);
+      act(() => hook.result.current.onChange());
+      expect(hook.result.current.value).toBe(true);
+    });
+    test("will return no errors when value is required and boolean true", () => {
+      const hook = renderHook(() => useInput("terms*", false));
+      act(() => hook.result.current.onChange());
+      act(() => hook.result.current.onBlur());
+      expect(hook.result.current.errors).toHaveLength(0);
+    });
+    test("will return errors when value is required and boolean false", () => {
+      const hook = renderHook(() => useInput("terms*", false));
+      console.log(hook.result.current);
+      act(() => hook.result.current.onChange());
+      console.log(hook.result.current);
+      act(() => hook.result.current.onBlur());
+      console.log(hook.result.current);
+      act(() => hook.result.current.onChange());
+      console.log(hook.result.current);
+      expect(hook.result.current.errors).toHaveLength(1);
+    });
+  });
   describe("validation sequence and behavior", () => {
     test("IS_REQUIRED validation is not added if other validation rules are present", () => {
       const hook = renderHook(() => useInput("name*", "", [() => ({ isValid: false, errors: ["Invalid"]})])).result;

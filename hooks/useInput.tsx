@@ -39,6 +39,7 @@ export default function useInput(
   const result: { name: string, isRequired: boolean } = Validator.removeAsterisk(initName);
   const { name } = result;
   const isRequired: boolean = initOptions?.required ?? result.isRequired;
+  // Check if input is tracking boolean values
 
   // Update validationFns
   const validation: ValidationFn[] = useMemo((): ValidationFn[] => {
@@ -55,15 +56,17 @@ export default function useInput(
   // Extract options configuration
   const enforceValidation: "none"| "soft" | "hard" = initOptions?.enforceValidation ?? "none";
   const dependencyString: string = initOptions?.dependencies ? "d:" + initOptions?.dependencies?.join(",") : "";
+  const isBoolean = typeof initValue === "boolean";
 
   const validate = useCallback((newValue: unknown = value): Validity => {
-      const { isValid, errors: returnedErrors } = Validator.validateAll(newValue, validation);
-      
-      // Only setErrors if value is truthy or if it is required
-      const hasDependencies: boolean = dependencyString.length > 0;
-      const hasValue: boolean = (newValue !== "" && newValue !== undefined && newValue !== null);
-      const shouldValidate = isRequired || hasDependencies || hasValue;
-      const newErrors = shouldValidate ? returnedErrors : [];
+
+    const { isValid, errors: returnedErrors } = Validator.validateAll(newValue, validation);
+  
+    // Only setErrors if value is truthy or if it is required
+    const hasDependencies: boolean = dependencyString.length > 0;
+    const hasValue: boolean = (newValue !== "" && newValue !== undefined && newValue !== null);
+    const shouldValidate = isRequired || hasDependencies || hasValue;
+    const newErrors = shouldValidate ? returnedErrors : [];
       
       // Only setErrors if input has been blurred
       return { isValid, errors: newErrors };
@@ -80,8 +83,6 @@ export default function useInput(
     >): void => {
     // Update input condtion.touched to true
     if (!condition.touched) setCondition(prev => ({ ...prev, touched: true }));
-    // Check if input is tracking boolean values
-    const isBoolean = typeof initValue === "boolean";
     const { value: newValue } = e.target;
     const { isValid, errors: newErrors } = validate(newValue);
     // Update errors only if input has been blurred
@@ -90,7 +91,7 @@ export default function useInput(
       if (enforceValidation === "hard" && !isValid) return prev;
       return newValue;
     });
-  }, [validate, condition, enforceValidation, initValue]);
+  }, [validate, condition, enforceValidation]);
   
   const onBlur: React.ChangeEventHandler<
     HTMLInputElement | 
@@ -113,6 +114,23 @@ export default function useInput(
     }
   }, [validate, condition, value, enforceValidation, prevValue]);
 
+  // onToggle will be used for boolean values
+  const onToggle: React.ChangeEventHandler<
+    HTMLInputElement |
+    HTMLTextAreaElement |
+    HTMLSelectElement
+    > = useCallback((): void => {
+      if (!condition.touched) setCondition(prev => ({ ...prev, touched: true }));
+      setValue(prev => {
+        // Update input condtion.touched to true        
+        const { errors: newErrors } = validate(!prev);
+        // Update errors only if input has been blurred
+        if (condition.blurred) setErrors(newErrors);
+        return !prev
+      });
+  }, [validate, condition]);
+
+
   // Reset everything to initState. Preserve errors by passing false
   const onReset = useCallback((resetErrors: boolean = true): void => {
     setValue(initValue);
@@ -134,7 +152,7 @@ export default function useInput(
     isRequired,
     touched: condition.touched,
     blurred: condition.blurred,
-    onChange,
+    onChange: isBoolean ? onToggle : onChange,
     onBlur,
     onReset,
     validate,
