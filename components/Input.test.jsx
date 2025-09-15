@@ -232,7 +232,7 @@ describe("Input component", () => {
           expect(input).not.toBeChecked();
         });
 
-        test.only("displays errors only when invalid when initial is true", () => {
+        test("displays errors only when invalid when initial is true", () => {
           const hook = renderHook(() => useInput("testName*", true, [(value) => ({ isValid: value, errors: value ? [] : ["Required value"]})]));
           const { rerender } = render(<Input hook={hook.result.current} type="checkbox" />);
           const input = screen.getByRole("checkbox");
@@ -252,7 +252,7 @@ describe("Input component", () => {
           expect(input).toBeChecked();
         });
 
-        test.only("displays errors only when invalid when initial is false", () => {
+        test("displays errors only when invalid when initial is false", () => {
           const hook = renderHook(() => useInput("testName*", false, [(value) => ({ isValid: value, errors: value ? [] : ["Required value"]})]));
           const { rerender } = render(<Input hook={hook.result.current} type="checkbox" />);
           const input = screen.getByRole("checkbox");

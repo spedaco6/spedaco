@@ -11,7 +11,7 @@ export type UseInputReturn = {
   touched: boolean,
   blurred: boolean,
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  onBlur: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  onBlur: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onReset: () => void,
   validate: () => void,
 }
@@ -40,6 +40,8 @@ export default function useInput(
   const result: { name: string, isRequired: boolean } = Validator.removeAsterisk(initName);
   const { name } = result;
   const isRequired: boolean = initOptions?.required ?? result.isRequired;
+  const isBoolean = typeof initValue === "boolean";
+
   // Check if input is tracking boolean values
 
   // Update validationFns
@@ -52,28 +54,24 @@ export default function useInput(
   const [ prevValue, setPrevValue ] = useState<string | number | boolean>(initValue);
   const [ value, setValue ] = useState<string | number | boolean>(initValue);
   const [ errors, setErrors ] = useState<string[]>([]);
-  const [ condition, setCondition ] = useState<InputCondition>({ blurred: !!initValue, touched: false });
+  const [ condition, setCondition ] = useState<InputCondition>({ blurred: isBoolean ? true : !!initValue, touched: false });
 
   // Extract options configuration
   const enforceValidation: "none"| "soft" | "hard" = initOptions?.enforceValidation ?? "none";
   const dependencyString: string = initOptions?.dependencies ? "d:" + initOptions?.dependencies?.join(",") : "";
-  const isBoolean = typeof initValue === "boolean";
   const message = initOptions.message ?? "";
 
   const validate = useCallback((newValue: unknown = value): Validity => {
-
     const { isValid, errors: returnedErrors } = Validator.validateAll(newValue, validation);
-  
     // Only setErrors if value is truthy or if it is required
     const hasDependencies: boolean = dependencyString.length > 0;
     const hasValue: boolean = (newValue !== "" && newValue !== undefined && newValue !== null);
     const shouldValidate = isRequired || hasDependencies || hasValue;
     // Override errors with default options message
     const errorMessage = (message && !isValid) ? [ message ] : returnedErrors;
-    const newErrors = shouldValidate ? errorMessage : [];
-      
-      // Only setErrors if input has been blurred
-      return { isValid, errors: newErrors };
+    const newErrors = shouldValidate ? errorMessage : [];  
+    // Only setErrors if input has been blurred
+    return { isValid, errors: newErrors };
   }, [validation, isRequired, value, dependencyString, message]);
 
   const onChange: React.ChangeEventHandler<
@@ -97,7 +95,7 @@ export default function useInput(
     });
   }, [validate, condition, enforceValidation]);
   
-  const onBlur: React.ChangeEventHandler<
+  const onBlur: React.FocusEventHandler<
     HTMLInputElement | 
     HTMLTextAreaElement | 
     HTMLSelectElement
