@@ -465,11 +465,24 @@ describe("useInput hook", () => {
         act(() => hook2.result.current.onChange()); 
         act(() => hook2.result.current.onBlur());
         act(() => hook2.result.current.onChange());
-        console.log(hook.result.current.errors.includes("Value is required"));
         expect(hook.result.current.errors.includes("Value is required")).toBe(false);
         expect(hook2.result.current.errors.includes("Value is required")).toBe(false);
         expect(hook.result.current.errors.includes("I expect hook to have this error message")).toBe(true);
         expect(hook2.result.current.errors.includes("I expect hook2 to have this error message")).toBe(true);
+      });
+      test("is removed on valid entry", () => {
+        const hook = renderHook(() => useInput("test*", "", [], { message: "I expect hook to have this error message" }));
+        const hook2 = renderHook(() => useInput("test*", false, [], { message: "I expect hook2 to have this error message" }));
+        act(() => hook.result.current.onChange({ target: { value: "change" }}));
+        act(() => hook.result.current.onBlur());
+        act(() => hook.result.current.onChange({ target: { value: "" }}));
+        act(() => hook.result.current.onChange({ target: { value: "change" }}));
+        act(() => hook2.result.current.onChange()); 
+        act(() => hook2.result.current.onBlur());
+        act(() => hook2.result.current.onChange());
+        act(() => hook2.result.current.onChange());
+        expect(hook.result.current.errors).toHaveLength(0);
+        expect(hook2.result.current.errors).toHaveLength(0);
       });
     });
   });
