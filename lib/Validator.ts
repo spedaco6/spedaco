@@ -181,9 +181,11 @@ export class Validator {
   }
 
   static matches: ((match: unknown) => ValidationFn) = (match) => {
+    const isValidator = match instanceof Validator;
+    const matchValue = isValidator ? match.getValue() : match;
     return (value: unknown) => {
       const errors: string[] = [];
-      if (value !== match) errors.push("Value does not match");
+      if (value !== matchValue) errors.push(`Value does not match${isValidator ? " " + match.getName() : ""}`);
       return { isValid: errors.length === 0, errors };
     }
   }
