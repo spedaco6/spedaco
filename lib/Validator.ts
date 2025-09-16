@@ -1,6 +1,7 @@
 export interface Validity { isValid: boolean, errors: string[] };
 export type ValidationFn = ( value: unknown ) => Validity;
-export type Validators = Record<string, Validator>;
+export type AllValidators = Record<string, Validator>;
+export interface AllValidity { isValid: boolean, errors: Record<string, string[]> };
 export interface PasswordOptions {
   min?: number,
   max?: number,
@@ -42,8 +43,6 @@ export class Validator {
     // Only return required error message if no other errors are included
     this.errors = compiledErrors.length > 1 && this.isRequired ? compiledErrors.filter(e => !e.includes("is required")) : compiledErrors;
     this.isValid = this.errors.length === 0;
-    console.log("staged: ", this.stagedErrors);
-    console.log("errors: ", this.errors);
     return this;
   }
 
@@ -77,7 +76,7 @@ export class Validator {
     return { isValid: totalValidity, errors: totalErrors };
   }
 
-  static getAllValidators(data: Record<string, unknown> | FormData, required: string[] = []): Validators {
+  static getAllValidators(data: Record<string, unknown> | FormData, required: string[] = []): AllValidators {
     const validators: Record<string, Validator> = {};
     Object.entries(data).forEach(([key, val]) => {
       validators[String(key)] = new Validator(String(key), val);
@@ -89,6 +88,15 @@ export class Validator {
       validators[String(input)].required();
     });
     return validators;
+  }
+
+  static getAllValidity(validators: AllValidators): AllValidity {
+    const errors: Record<string, string[]> = {};
+    Object.entries(validators).forEach(([key, val]) => {
+      if (!val.isValid) errors[key] = val.errors;
+    });
+    const isValid = Object.keys(errors).length === 0;
+    return { isValid, errors };
   }
 
   // Static validation methods
