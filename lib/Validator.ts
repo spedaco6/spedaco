@@ -40,8 +40,10 @@ export class Validator {
       .values(this.stagedErrors)
       .reduce((prev, current) => [...prev, ...current]);
     // Only return required error message if no other errors are included
-    this.errors = compiledErrors.length > 1 && this.isRequired ? compiledErrors.filter(e => e.includes("is required")) : compiledErrors;
+    this.errors = compiledErrors.length > 1 && this.isRequired ? compiledErrors.filter(e => !e.includes("is required")) : compiledErrors;
     this.isValid = this.errors.length === 0;
+    console.log("staged: ", this.stagedErrors);
+    console.log("errors: ", this.errors);
     return this;
   }
 
@@ -200,7 +202,7 @@ export class Validator {
     return this.validate();
   }
 
-  public isPassword(options: PasswordOptions): this {
+  public isPassword(options: PasswordOptions = {}): this {
     const { errors } = Validator.isPassword(options)(this.value);
     this.addErrors(errors, "isPassword");
     return this.validate();
@@ -240,7 +242,8 @@ export class Validator {
   }
   
   public matches(matchVal: unknown): this {
-    const { errors } = Validator.matches(matchVal)(this.value);
+    const match = matchVal instanceof Validator ? matchVal.getValue() : matchVal;
+    const { errors } = Validator.matches(match)(this.value);
     this.addErrors(errors, "matches");
     return this.validate();
   }
