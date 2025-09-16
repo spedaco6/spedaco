@@ -19,5 +19,6 @@ export async function signup(prevState: SignUpData, formData: FormData): Promise
   console.log("sanitized", sanitized);
   const validators = Validator.getAllValidators(sanitized);
   console.log("validators", validators);
+  
   return await new Promise(res => setTimeout(() => res({}), 1000));
 }
