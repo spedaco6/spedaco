@@ -1,7 +1,7 @@
 import LoginForm from '@/components/Forms/LoginForm'
-import React, { JSX } from 'react'
+import React from 'react'
 
-export default async function Login(): Promise<JSX.Element> {
+export default function Login(): React.ReactElement {
   return (
     <main className="flex items-center flex-col">
       <LoginForm />
