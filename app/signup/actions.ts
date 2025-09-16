@@ -1,7 +1,7 @@
 'use server';
 
 import { sanitize } from "@/lib/utils";
-import { Validator } from "@/lib/Validator";
+import { Validator, Validators } from "@/lib/Validator";
 
 interface SignUpData {
   firstName?: string,
@@ -13,12 +13,31 @@ interface SignUpData {
 };
 
 export async function signup(prevState: SignUpData, formData: FormData): Promise<SignUpData> {
-  const requiredInputs: (keyof SignUpData)[] = ["firstName", "lastName", "email", "password", "confirmPassword", "terms"];
-  console.log("formData", formData);
-  const sanitized: Record<string, unknown> = sanitize(formData);
-  console.log("sanitized", sanitized);
-  const validators = Validator.getAllValidators(sanitized);
-  console.log("validators", validators);
+  try {
+    // Sanitize Data
+    const requiredInputs: (keyof SignUpData)[] = ["firstName", "lastName", "email", "password", "confirmPassword", "terms"];
+    const sanitized: Record<string, unknown> = sanitize(formData);
   
-  return await new Promise(res => setTimeout(() => res({}), 1000));
+    // Validate Data
+    const validators: Validators = Validator.getAllValidators(sanitized, requiredInputs);
+    console.log("validators", validators);
+  
+    // Authenticate User
+      // No authentication required for new users
+  
+    // Authorize User
+      // Check to see if requested email is already in use
+  
+    // Complete Action
+      // Add new user
+      // Create token
+      // Create cookie
+  
+    // Return Result
+      // Return true or false
+    return await new Promise(res => setTimeout(() => res({}), 1000));
+  } catch (err) {
+    console.log(err);
+    return await new Promise(res => setTimeout(() => res({}), 1000));
+  }
 }

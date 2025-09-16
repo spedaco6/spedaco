@@ -1,5 +1,6 @@
 export interface Validity { isValid: boolean, errors: string[] };
 export type ValidationFn = ( value: unknown ) => Validity;
+export type Validators = Record<string, Validator>;
 export interface PasswordOptions {
   min?: number,
   max?: number,
@@ -74,7 +75,7 @@ export class Validator {
     return { isValid: totalValidity, errors: totalErrors };
   }
 
-  static getAllValidators(data: Record<string, unknown> | FormData, required: string[] = []): Record<string, Validator> {
+  static getAllValidators(data: Record<string, unknown> | FormData, required: string[] = []): Validators {
     const validators: Record<string, Validator> = {};
     Object.entries(data).forEach(([key, val]) => {
       validators[String(key)] = new Validator(String(key), val);
