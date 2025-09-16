@@ -74,10 +74,9 @@ export class Validator {
     return { isValid: totalValidity, errors: totalErrors };
   }
 
-  static getAllValidators(data: Record<string, string> | FormData): Record<string, Validator> {
+  static getAllValidators(data: Record<string, unknown> | FormData): Record<string, Validator> {
     const validators: Record<string, Validator> = {};
     Object.entries(data).forEach(([key, val]) => {
-      console.log(key);
       validators[String(key)] = new Validator(String(key), val);
     });
     return validators;
