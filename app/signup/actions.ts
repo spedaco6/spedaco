@@ -21,6 +21,10 @@ export async function signup(prevState: SignUpData, formData: FormData): Promise
     // Validate Data
     const validators: Validators = Validator.getAllValidators(sanitized, requiredInputs);
     console.log("validators", validators);
+    validators.email.isEmail();
+    validators.password.isPassword();
+    validators.confirmPassword.matches(validators.password);
+    console.log(validators);
   
     // Authenticate User
       // No authentication required for new users
