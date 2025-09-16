@@ -73,8 +73,17 @@ export class Validator {
     } } }
     return { isValid: totalValidity, errors: totalErrors };
   }
-  // Static validation methods
 
+  static getAllValidators(data: Record<string, string> | FormData): Record<string, Validator> {
+    const validators: Record<string, Validator> = {};
+    Object.entries(data).forEach(([key, val]) => {
+      console.log(key);
+      validators[String(key)] = new Validator(String(key), val);
+    });
+    return validators;
+  }
+
+  // Static validation methods
   static required: ValidationFn = (value) => {
     const errors: string[] = [];
     if (value === "" || value === null || value === undefined || value === false) errors.push("Value is required");
@@ -116,30 +125,6 @@ export class Validator {
       return final;
     }
   } 
-  /* static isPassword = (value: unknown, initOptions: PasswordOptions) => {
-    const options: Required<PasswordOptions> = {
-      min: 8,
-      max: Number.POSITIVE_INFINITY,
-      upper: true,
-      lower: true,
-      number: true,
-      special: true,
-      ...initOptions,
-    }
-    const result: Validity[] = [];
-    result.push(Validator.min(options.min)(value));
-    result.push(Validator.max(options.max)(value));
-    if (options.upper) result.push(Validator.hasUpper(value));
-    if (options.lower) result.push(Validator.hasLower(value));
-    if (options.number) result.push(Validator.hasNumber(value));
-    if (options.special) result.push(Validator.hasSpecial(value));
-
-    const final = Object.values(result).reduce((prev, current) => {
-      return { isValid: current.isValid && prev.isValid, errors: [...prev.errors, ...current.errors] };
-    }, { isValid: true, errors: [] } as Validity);
-    
-    return final;
-  } */
 
   static hasUpper: ValidationFn = (value) => {
     const errors: string[] = [];
