@@ -17,15 +17,13 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const password: UseInputReturn = useInput("password", "", IS_PASSWORD);
   const valid_confirm_pass = useMemo(() => ([Validator.matches(password.value)]), [password.value]);
   const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
-  const terms: UseInputReturn = useInput("terms", false, [], { message: "Terms and conditions must be accepted"});
-  const [prevState, formAction] = useActionState(signup, {});
+  const terms: UseInputReturn = useInput("terms*", false, [], { message: "Terms and conditions must be accepted"});
+  const [prevState, formAction, isPending] = useActionState(signup, {});
 
-
-
-  return <Form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
+  return <form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
     <h2 className="text-2xl">Sign Up</h2>
     <div className="flex gap-2">
-      <Input title="First Name" hook={firstName} autoFocus />
+      <Input title="First Name" hook={firstName} disabled={isPending} autoFocus />
       <Input title="Last Name" hook={lastName} />
     </div>
     <Input title="Email" hook={email} />
@@ -33,7 +31,7 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
     <Input title="Confirm Password" type="password" hook={confirmPassword} />
     <Input title="Accept the terms and conditions" type="checkbox" hook={terms} />
     <div className="flex justify-end m-2 mt-4">
-      <button>Login</button>
+      <button>{isPending ? "Sending request..." : "Sign up"}</button>
     </div>
-  </Form>
+  </form>
 }

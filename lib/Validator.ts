@@ -21,7 +21,7 @@ export class Validator {
 
   constructor(name: string, value: unknown) {
     this.name = name;
-    this.value = value;
+    this.value = typeof value === "string" ? value.trim() : value;
   }
 
   public getName(): string { return this.name };
