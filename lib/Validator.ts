@@ -1,6 +1,7 @@
 export interface Validity { isValid: boolean, errors: string[] };
 export type ValidationFn = ( value: unknown ) => Validity;
 export type AllValidators = Record<string, Validator>;
+export type AllValues = Record<string, unknown>;
 export interface AllValidity { isValid: boolean, validationErrors: Record<string, string[]> };
 export interface PasswordOptions {
   min?: number,
@@ -89,6 +90,14 @@ export class Validator {
       if (isRequired) validators[String(name)].required();
     });
     return validators;
+  }
+
+  static getAllValues(validators: AllValidators): AllValues {
+    const values: AllValues = {};
+    for (const key in validators) {
+      values[key] = validators[key].getValue();
+    }
+    return values;
   }
 
   static getAllValidity(validators: AllValidators): AllValidity {

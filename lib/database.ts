@@ -17,7 +17,7 @@ export async function connectToDB() {
     return dbConnection;
   } catch (err) {
     console.error("MongoDB connection error:", err);
-    throw err;
+    return null;
   }
 }
 
