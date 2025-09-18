@@ -1,16 +1,17 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.NODE_ENV === "development" ? process.env.DB_URI_DEV : process.env.DB_URI;
-console.log(MONGO_URI);
-
-if (!MONGO_URI) {
-  throw new Error("Missing DB_URI_DEV in environment variables");
-}
 
 let dbConnection: typeof mongoose | null = null;
 
 export async function connectToDB() {
+  const MONGO_URI = process.env.NODE_ENV === "development" ? process.env.DB_URI_DEV : process.env.DB_URI;
+  
+  if (!MONGO_URI) {
+    throw new Error("Missing DB_URI_DEV in environment variables");
+  }
+  
   if (dbConnection) return dbConnection;
+  
   try {
     dbConnection = await mongoose.connect(MONGO_URI!);
     console.log("MongoDB connected");
