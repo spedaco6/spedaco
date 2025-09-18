@@ -9,6 +9,7 @@ export interface IUser extends Document {
   verified: boolean,
   role: UserRole, 
   terms: boolean,
+  verificationToken: string,
 }
 
 const schema = new Schema<IUser>({
@@ -24,6 +25,7 @@ const schema = new Schema<IUser>({
     enum: ["user", "client", "manager", "admin", "super"] 
   },
   terms: { type: Boolean, required: true },
+  verificationToken: String,
 }, { timestamps: true });
 
 export const User = models.User || model<IUser>("User", schema);

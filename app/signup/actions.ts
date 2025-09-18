@@ -42,25 +42,31 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     if (user) return { success: false, validationErrors: {}, errors: ["Email already exists"], prevValues: Validator.getAllValues(validators) };
 
     // Complete Action
-      // Hash password
-      const hashedPassword = await bcrypt.hash(String(validators.password.getValue()), 10);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(String(validators.password.getValue()), 10);
 
-      // Create new user object
-      const newUser = new User({
-        firstName: validators.firstName.getValue(),
-        lastName: validators.lastName.getValue(),
-        email: validators.email.getValue(),
-        password: hashedPassword,
-        terms: validators.terms.getValue(),
-      });
-
-      // Add new user
-      await newUser.save();
-
-    } catch (err) {
-      console.log(err);
-      return {success: false, validationErrors: {}, errors: [`Something went wrong: ${err}`], prevValues: sanitized ? sanitized : {}};
-    }
+    // Create and add new user to database
+    const newUser = new User({
+      firstName: validators.firstName.getValue(),
+      lastName: validators.lastName.getValue(),
+      email: validators.email.getValue(),
+      password: hashedPassword,
+      terms: validators.terms.getValue(),
+    });
+    await newUser.save();
+    
+    // Create verification token
+    const verificationToken = "123";
+    // Send verification email
+    console.log("Send email with token: ", verificationToken);
+    // Save verification token to user
+    newUser.verificationToken = verificationToken;
+    await newUser.save();
+    
+  } catch (err) {
+    console.log(err);
+    return {success: false, validationErrors: {}, errors: [`Something went wrong: ${err}`], prevValues: sanitized ? sanitized : {}};
+  }
     
   // Return Result or Reroute
   return redirect("/verify");
