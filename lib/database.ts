@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.DB_URI_DEV;
+const MONGO_URI = process.env.NODE_ENV === "development" ? process.env.DB_URI_DEV : process.env.DB_URI;
 console.log(MONGO_URI);
 
 if (!MONGO_URI) {

@@ -1,6 +1,5 @@
 "use client";
-import React, { useActionState, useMemo } from "react";
-import Form from "./Form";
+import React, { useActionState, useEffect, useMemo } from "react";
 import Input from "../Input";
 import useInput, { UseInputReturn } from "@/hooks/useInput";
 import { ValidationFn, Validator } from "@/lib/Validator";
@@ -19,6 +18,11 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
   const terms: UseInputReturn = useInput("terms*", false, [], { message: "Terms and conditions must be accepted"});
   const [prevState, formAction, isPending] = useActionState(signup, {});
+  
+  useEffect(() => {
+    console.log("UPDATE FROM VALUES ON RETURN OF PREV STATE");
+    console.log(prevState);
+  }, [prevState]);
 
   return <form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
     <h2 className="text-2xl">Sign Up</h2>
