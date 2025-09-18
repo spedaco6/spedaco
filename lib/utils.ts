@@ -1,5 +1,6 @@
 import xss from "xss";
 
+
 export function sanitize(data: Record<string, unknown> | FormData): Record<string, unknown> {
   const sanitized: Record<string, unknown> = {};
   if (data instanceof FormData) {

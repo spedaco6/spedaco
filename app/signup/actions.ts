@@ -1,5 +1,6 @@
 'use server';
 
+import { SALT_ROUNDS } from "@/lib/config";
 import { connectToDB } from "@/lib/database";
 import { sanitize } from "@/lib/utils";
 import { Validator, AllValidators, AllValidity } from "@/lib/Validator";
@@ -43,7 +44,7 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
 
     // Complete Action
     // Hash password
-    const hashedPassword = await bcrypt.hash(String(validators.password.getValue()), 10);
+    const hashedPassword = await bcrypt.hash(String(validators.password.getValue()), SALT_ROUNDS);
 
     // Create and add new user to database
     const newUser = new User({
@@ -61,8 +62,9 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     console.log("Send email with token: ", verificationToken);
     // Save verification token to user
     newUser.verificationToken = verificationToken;
+    console.log(newUser);
     await newUser.save();
-    
+
   } catch (err) {
     console.log(err);
     return {success: false, validationErrors: {}, errors: [`Something went wrong: ${err}`], prevValues: sanitized ? sanitized : {}};
