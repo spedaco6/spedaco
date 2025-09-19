@@ -39,8 +39,8 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
   
     // Authorize User
     // Check to see if requested email is available for use
-    const user = await User.findOne({ email: validators.email.getValue() });
-    if (user) return { success: false, validationErrors: {}, errors: ["Email already exists"], prevValues: Validator.getAllValues(validators) };
+    const existingUser = await User.findOne({ email: validators.email.getValue() });
+    if (existingUser) return { success: false, validationErrors: {}, errors: ["Email already exists"], prevValues: Validator.getAllValues(validators) };
 
     // Complete Action
     // Hash password

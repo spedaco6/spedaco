@@ -2,20 +2,14 @@ import { describe, expect, test, vi } from "vitest";
 import { signup } from "./actions";
 import * as utils from "@/lib/utils.ts";
 import { Validator } from "../../lib/Validator";
-import { User } from "@/models/User";
-
+import * as nav from "next/navigation";
 
 vi.mock("@/lib/database.ts", () => ({
-  connectToDB: vi.fn(() => {
-    console.log("connectToDB");
-    return Promise.resolve(true);
-  }),  
+  connectToDB: vi.fn(() => Promise.resolve(true)),  
 }));  
 
 vi.mock("next/navigation", () => ({
-  redirect: vi.fn(() => {
-    console.log('redirect');
-  }) 
+  redirect: vi.fn()
 }));
 
 vi.mock("@/models/User.ts", () => {
@@ -25,7 +19,6 @@ vi.mock("@/models/User.ts", () => {
   User.findOne = mockFindOne;
   return { User, __esModule: true }
 });  
-
 
 describe("Tests for signup actions", () => {
   describe("Signup server action", () => {
@@ -46,13 +39,6 @@ describe("Tests for signup actions", () => {
       vi.restoreAllMocks();
     });
     
-    test("sanity", async () => {
-      const newUser = new User({ test: "test" });
-      expect(signup).toBeDefined();
-      expect(typeof newUser.save === "function");
-      await newUser.save();
-      expect(newUser.save).toHaveBeenCalled();
-    });
     test("is defined", () => {
       expect(signup).toBeDefined();
     });
@@ -72,17 +58,9 @@ describe("Tests for signup actions", () => {
       expect(spy).toBeCalledTimes(1);
     });
     test("calls Validator.getAllValues", async () => {
-      
-
-    });
-    test("returns { validationErrors: {} } when invalid formData is received", () => {
-
-    });
-    test("returns { errors: ['error messages'] } when problem occurs", () => {
-
-    });
-    test("returns { errors: ['Email already exists'] } when email is already in use", () => {
-
+      const spy = vi.spyOn(Validator, "getAllValues");
+      await signup(null, formData);
+      expect(spy).toBeCalledTimes(0);  
     });
     test("calls createVerificationToken", () => {
 
@@ -90,7 +68,28 @@ describe("Tests for signup actions", () => {
     test("calls sendEmail", () => {
 
     });
-    test("redirects to /login when successful", () => {
+    test("redirects to /verify when successful", async () => {
+      const spy = vi.spyOn(nav, "redirect");
+      await signup(null, formData);    
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith("/verify");
+    });
+  });
+
+  describe("error behaviour", () => {
+    test("error conditions return prevValues", () => {
+
+    });
+    test("invalid data return validationErrors property", () => {
+
+    });
+    test("failure to connect returns errors property", () => {
+
+    });
+    test("existing user returns 'Email already exists' in errors property", () => {
+
+    });
+    test("mongoose error returns errors property", () => {
 
     });
   });
