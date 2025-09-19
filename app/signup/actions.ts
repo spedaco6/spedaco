@@ -59,12 +59,10 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     // Create verification token
     const verificationToken = "123";
     // Send verification email
-    console.log("Send email with token: ", verificationToken);
+
     // Save verification token to user
     newUser.verificationToken = verificationToken;
-    console.log(newUser);
     await newUser.save();
-
   } catch (err) {
     console.log(err);
     return {success: false, validationErrors: {}, errors: [`Something went wrong: ${err}`], prevValues: sanitized ? sanitized : {}};

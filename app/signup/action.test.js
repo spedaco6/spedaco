@@ -2,8 +2,29 @@ import { describe, expect, test, vi } from "vitest";
 import { signup } from "./actions";
 import * as utils from "@/lib/utils.ts";
 import { Validator } from "../../lib/Validator";
+import { User } from "@/models/User";
 
 
+vi.mock("@/lib/database.ts", () => ({
+  connectToDB: vi.fn(() => {
+    console.log("connectToDB");
+    return Promise.resolve(true);
+  }),  
+}));  
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(() => {
+    console.log('redirect');
+  }) 
+}));
+
+vi.mock("@/models/User.ts", () => {
+  const mockSave = vi.fn(() => { Promise.resolve(true) });
+  const mockFindOne = vi.fn(() => Promise.resolve(null));
+  const User = vi.fn(() => ({ save: mockSave }));  
+  User.findOne = mockFindOne;
+  return { User, __esModule: true }
+});  
 
 
 describe("Tests for signup actions", () => {
@@ -19,8 +40,19 @@ describe("Tests for signup actions", () => {
       formData.append("terms", true);
     });
     afterEach(() => {
+      vi.clearAllMocks();
+    });
+    afterAll(() => {
       vi.restoreAllMocks();
-    })
+    });
+    
+    test("sanity", async () => {
+      const newUser = new User({ test: "test" });
+      expect(signup).toBeDefined();
+      expect(typeof newUser.save === "function");
+      await newUser.save();
+      expect(newUser.save).toHaveBeenCalled();
+    });
     test("is defined", () => {
       expect(signup).toBeDefined();
     });
@@ -40,6 +72,7 @@ describe("Tests for signup actions", () => {
       expect(spy).toBeCalledTimes(1);
     });
     test("calls Validator.getAllValues", async () => {
+      
 
     });
     test("returns { validationErrors: {} } when invalid formData is received", () => {
