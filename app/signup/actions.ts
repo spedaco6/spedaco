@@ -18,6 +18,9 @@ export interface FormResponse {
 export async function signup(prevState: FormResponse, formData: FormData): Promise<FormResponse> {
   let sanitized: Record<string, unknown> | null = null;
   try {
+    // Check for data
+    if (!formData) return { success: false, errors: ["No data found"], validationErrors: {}, prevValues: {} };
+
     // Sanitize Data
     const includeInputs: string[] = ["firstName*", "lastName*", "email*", "password*", "confirmPassword", "terms*"];
     sanitized = sanitize(formData);
