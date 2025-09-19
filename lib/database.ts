@@ -7,6 +7,7 @@ export async function connectToDB() {
   const MONGO_URI = process.env.NODE_ENV === "development" ? process.env.DB_URI_DEV : process.env.DB_URI;
   
   if (!MONGO_URI) {
+    if (process.env.NODE_ENV === "test") return null;
     throw new Error("Missing DB_URI_DEV in environment variables");
   }
   
