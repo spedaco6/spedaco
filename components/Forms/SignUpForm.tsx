@@ -13,7 +13,7 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const firstName: UseInputReturn = useInput("firstName*");
   const lastName: UseInputReturn = useInput("lastName*");
   const email: UseInputReturn = useInput("email", "", IS_EMAIL);
-  const password: UseInputReturn = useInput("password", "", IS_PASSWORD);
+  const password: UseInputReturn = useInput("password");
   const valid_confirm_pass = useMemo(() => ([Validator.matches(password.value)]), [password.value]);
   const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
   const terms: UseInputReturn = useInput("terms*", false, [], { message: "Terms and conditions must be accepted"});

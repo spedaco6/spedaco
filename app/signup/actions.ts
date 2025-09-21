@@ -2,6 +2,8 @@
 
 import { SALT_ROUNDS } from "@/lib/config";
 import { connectToDB } from "@/lib/database";
+import { sendEmail } from "@/lib/email";
+import { createVerificationToken } from "@/lib/tokens";
 import { sanitize } from "@/lib/utils";
 import { Validator, AllValidators, AllValidity } from "@/lib/Validator";
 import { User } from "@/models/User";
@@ -60,8 +62,10 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     await newUser.save();
     
     // Create verification token
+    createVerificationToken();
     const verificationToken = "123";
     // Send verification email
+    await sendEmail();
 
     // Save verification token to user
     newUser.verificationToken = verificationToken;

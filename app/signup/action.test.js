@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import * as utils from "@/lib/utils.ts";
 import { Validator } from "../../lib/Validator";
 import * as nav from "next/navigation";
+import * as email from "@/lib/email";
 
 describe("Tests for signup actions", () => {
   describe("Signup server action", () => {
@@ -21,6 +22,11 @@ describe("Tests for signup actions", () => {
       vi.mock("next/navigation", () => ({
         redirect: vi.fn(() => {}),
       }));
+      vi.mock("@/lib/email", () => ({
+        sendEmail: vi.fn(() => Promise.resolve(true)),
+      }));
+
+      
 
       const imports = await import("./actions");
       signup = imports.signup;
@@ -111,7 +117,6 @@ describe("Tests for signup actions", () => {
       const result = await signupWithExistingUser(null, formData);
       expect(result).toHaveProperty("errors");
       expect(result.errors).toHaveLength(1);
-      console.log(result.errors);
       expect(result.errors.includes("Email already exists")).toBe(true);
       vi.resetModules();
       vi.doMock("@/models/User.ts", () => {
@@ -125,12 +130,17 @@ describe("Tests for signup actions", () => {
       signup = signupRestored;      
     });
 
-    test("calls createVerificationToken", () => {
-      
+    test("calls createVerificationToken", async () => {
+      const tokens = await import("@/lib/tokens");
+      const spy = vi.spyOn(tokens, "createVerificationToken");
+      await signup(null, formData);
+      expect(spy).toHaveBeenCalledOnce();    
     });
 
-    test("calls sendEmail", () => {
-      
+    test("calls sendEmail once", async () => {
+      const spy = vi.spyOn(email, "sendEmail");
+      await signup(null, formData);
+      expect(spy).toHaveBeenCalledOnce();    
     });
     
     test("does not call Validator.getAllValues if successful", async () => {
