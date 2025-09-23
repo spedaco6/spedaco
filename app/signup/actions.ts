@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 
 export interface FormResponse {
   success?: boolean,
-  errors?: string[],
+  error?: string,
   validationErrors?: Record<string, string[]>,
   prevValues?: Record<string, unknown>,
 }
@@ -21,7 +21,7 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
   let sanitized: Record<string, unknown> | null = null;
   try {
     // Check for data
-    if (!formData) return { success: false, errors: ["No data found"], validationErrors: {}, prevValues: {} };
+    if (!formData) return { success: false, error: "No data found", validationErrors: {}, prevValues: {} };
 
     // Sanitize Data
     const includeInputs: string[] = ["firstName*", "lastName*", "email*", "password*", "confirmPassword", "terms*"];
@@ -33,11 +33,11 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     validators.password.isPassword();
     validators.confirmPassword.matches(validators.password);
     const validity: AllValidity = Validator.getAllValidity(validators);
-    if (!validity.isValid) return { success: false, validationErrors: validity.validationErrors, errors: [], prevValues: Validator.getAllValues(validators)};
+    if (!validity.isValid) return { success: false, validationErrors: validity.validationErrors, error: "", prevValues: Validator.getAllValues(validators)};
     
     // Connect to database
     const connection = await connectToDB();
-    if (!connection) return { success: false, validationErrors: {}, errors: ["Could not connect to the server. Try again later"], prevValues: Validator.getAllValues(validators)};
+    if (!connection) return { success: false, validationErrors: {}, error: "Could not connect to the server. Try again later", prevValues: Validator.getAllValues(validators)};
   
     // Authenticate User
       // No authentication required for new users
@@ -45,7 +45,7 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     // Authorize User
     // Check to see if requested email is available for use
     const existingUser = await User.findOne({ email: validators.email.getValue() });
-    if (existingUser) return { success: false, validationErrors: {}, errors: ["Email already exists"], prevValues: Validator.getAllValues(validators) };
+    if (existingUser) return { success: false, validationErrors: {}, error: "Email already exists", prevValues: Validator.getAllValues(validators) };
 
     // Complete Action
     // Hash password
@@ -72,7 +72,7 @@ export async function signup(prevState: FormResponse, formData: FormData): Promi
     await newUser.save();
   } catch (err) {
     console.log(err);
-    return {success: false, validationErrors: {}, errors: [`Something went wrong: ${err}`], prevValues: sanitized ? sanitized : {}};
+    return {success: false, validationErrors: {}, error: `Something went wrong: ${err}`, prevValues: sanitized ? sanitized : {}};
   }
     
   // Return Result or Reroute

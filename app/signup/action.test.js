@@ -4,6 +4,8 @@ import { Validator } from "../../lib/Validator";
 import * as nav from "next/navigation";
 import * as email from "@/lib/email";
 
+// vi.stubEnv("DB_URI_DEV", "placeholder");
+
 describe("Tests for signup actions", () => {
   describe("Signup server action", () => {
     const formData = new FormData();
@@ -44,6 +46,7 @@ describe("Tests for signup actions", () => {
     afterAll(() => {
       vi.resetAllMocks();
       vi.resetModules();
+      // vi.unstubAllEnvs();
     });
 
     test("is defined", async () => {
@@ -94,8 +97,8 @@ describe("Tests for signup actions", () => {
       }));
       const { signup: signupWithNoConnection } = await import("./actions");
       const result = await signupWithNoConnection(null, formData);
-      expect(result).toHaveProperty("errors");
-      expect(result.errors).toHaveLength(1);
+      expect(result).toHaveProperty("error");
+      expect(result.error).toBe("Could not connect to the server. Try again later");
       vi.resetModules();
       vi.doMock("@/lib/database.ts", () => ({
         connectToDB: vi.fn().mockResolvedValue(true),
@@ -115,9 +118,8 @@ describe("Tests for signup actions", () => {
       }); 
       const { signup: signupWithExistingUser } = await import("./actions");
       const result = await signupWithExistingUser(null, formData);
-      expect(result).toHaveProperty("errors");
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors.includes("Email already exists")).toBe(true);
+      expect(result).toHaveProperty("error");
+      expect(result.error).toBe("Email already exists");
       vi.resetModules();
       vi.doMock("@/models/User.ts", () => {
         const mockSave = vi.fn(() => { Promise.resolve(true) });
