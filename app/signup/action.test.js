@@ -1,38 +1,42 @@
-import { describe, expect, test, vi } from "vitest";
-import * as utils from "@/lib/utils.ts";
-import { Validator } from "../../lib/Validator";
-import * as nav from "next/navigation";
+import { describe, test, vi, expect } from "vitest";
+import * as accounts from "./actions";
+import * as utils from "@/lib/utils";
+import * as database from "@/lib/database";
+import * as tokens from "@/lib/tokens";
 import * as email from "@/lib/email";
+import bcrypt from "bcrypt";
+import { Validator } from "@/lib/Validator";
+import { User } from "@/models/User";
+import * as nextNav from "next/navigation";
 
-// vi.stubEnv("DB_URI_DEV", "placeholder");
+let createAccount = accounts.createAccount;
 
-describe("Tests for signup actions", () => {
-  describe("Signup server action", () => {
-    const formData = new FormData();
-    let signup;
-    beforeAll(async () => {
-      vi.mock("@/models/User.ts", () => {
-        const mockSave = vi.fn(() => { Promise.resolve(true) });
-        const mockFindOne = vi.fn(() => Promise.resolve(null));
-        const User = vi.fn(() => ({ save: mockSave })); // const User = vi.fn().mockImplementation(() => ({ save: mockSave })); also works   
-        User.findOne = mockFindOne;
-        return { User }
-      }); 
-      vi.mock("@/lib/database.ts", () => ({
-        connectToDB: vi.fn(() => Promise.resolve(true)),  
-      }));  
-      vi.mock("next/navigation", () => ({
-        redirect: vi.fn(() => {}),
-      }));
-      vi.mock("@/lib/email", () => ({
-        sendEmail: vi.fn(() => Promise.resolve(true)),
-      }));
+vi.mock("@/models/User", () => {
+  const mockSave = vi.fn(() => ({
+    _id: "userId",
+  }));
+  const mockFindOne = vi.fn(() => Promise.resolve(null));
+  const User = vi.fn(() => ({ save: mockSave }));
+  User.findOne = mockFindOne;
+  return { User };
+});
 
-      
+vi.mock("bcrypt", () => ({ default: {
+  hash: vi.fn(() => Promise.resolve("hashedPassword")),
+}}));
 
-      const imports = await import("./actions");
-      signup = imports.signup;
-      
+vi.mock("@/lib/database", () => ({
+  connectToDB: vi.fn(() => Promise.resolve(true))
+}));
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(() => true)
+}), { spy: true });
+
+describe("Account actions", () => {
+  describe("createAccount", () => {
+    let formData = new FormData();
+    beforeAll(() => {
       formData.append("firstName", "Test");
       formData.append("lastName", "Name");
       formData.append("email", "email@email.com");
@@ -40,122 +44,158 @@ describe("Tests for signup actions", () => {
       formData.append("confirmPassword", "P@ssword1");
       formData.append("terms", true);
     });
-    beforeEach(() => {
-      vi.clearAllMocks();
-    });
+    beforeEach(() => vi.clearAllMocks());
     afterAll(() => {
       vi.resetAllMocks();
       vi.resetModules();
-      // vi.unstubAllEnvs();
     });
-
-    test("is defined", async () => {
-      expect(signup).toBeDefined();
-    });
-    test("returns success: false if no formData is provided", async () => {
-      const result = await signup();
-      expect(result).toHaveProperty("success");
-      expect(result.success).toBe(false);
-      expect(nav.redirect).not.toHaveBeenCalled();
+    
+    test("is defined", () => {
+      expect(createAccount).toBeDefined();
     });
     test("calls sanitize once", async () => {
       const spy = vi.spyOn(utils, "sanitize");
-      await signup(null, formData);
+      await createAccount({ test: "value" });
       expect(spy).toHaveBeenCalledOnce();
     });
-    test("calls Validator.getAllValidators once", async () => {
+    test("calls getAllValidators once", async () => {
       const spy = vi.spyOn(Validator, "getAllValidators");
-      await signup(null, formData);
+      await createAccount({ test: "value" });
       expect(spy).toHaveBeenCalledOnce();
     });
-    test("returns validationErrors for invalid data only", async () => {
-      const badFormData = new FormData();
-      badFormData.append("firstName", "Test");
-      badFormData.append("password", "password");
-      const result = await signup(null, badFormData);
-      expect(result).toHaveProperty("validationErrors");
-      const { validationErrors } = result;
-      expect(validationErrors).not.toHaveProperty("firstName");
-      expect(validationErrors).toHaveProperty("lastName");
-      expect(validationErrors).toHaveProperty("email");
-      expect(validationErrors).toHaveProperty("password");
-      expect(validationErrors).toHaveProperty("confirmPassword");
-      expect(validationErrors).toHaveProperty("terms");
-      expect(nav.redirect).not.toHaveBeenCalled();
-    });
-    
-    test("calls Validator.getAllValidity once", async () => {
-      const spy = vi.spyOn(Validator, "getAllValidity");
-      await signup(null, formData);
+    test("calls connectToDB once", async () => {
+      const spy = vi.spyOn(database, "connectToDB");
+      await createAccount(formData);
       expect(spy).toHaveBeenCalledOnce();
     });
-    
-    test("returns an error in the errors array when database connection fails", async () => {
-      vi.resetModules();
-      vi.doMock("@/lib/database.ts", () => ({
-        connectToDB: vi.fn().mockResolvedValue(null),
-      }));
-      const { signup: signupWithNoConnection } = await import("./actions");
-      const result = await signupWithNoConnection(null, formData);
-      expect(result).toHaveProperty("error");
-      expect(result.error).toBe("Could not connect to the server. Try again later");
-      vi.resetModules();
-      vi.doMock("@/lib/database.ts", () => ({
-        connectToDB: vi.fn().mockResolvedValue(true),
-      }));
-      const { signup: restoredSignup } = await import("./actions");
-      signup = restoredSignup;
+    test("calls User.findOne once", async () => {
+      const spy = vi.spyOn(User, "findOne");
+      await createAccount(formData);
+      expect(spy).toHaveBeenCalledOnce();
     });
-    
-    test("returns an error in the errors array when user already exists", async () => {
-      vi.resetModules();
-      vi.doMock("@/models/User.ts", () => {
-        const mockSave = vi.fn(() => { Promise.resolve(true) });
-        const mockFindOne = vi.fn(() => Promise.resolve(true));
-        const User = vi.fn(() => ({ save: mockSave })); 
-        User.findOne = mockFindOne;
-        return { User }
-      }); 
-      const { signup: signupWithExistingUser } = await import("./actions");
-      const result = await signupWithExistingUser(null, formData);
-      expect(result).toHaveProperty("error");
-      expect(result.error).toBe("Email already exists");
-      vi.resetModules();
-      vi.doMock("@/models/User.ts", () => {
-        const mockSave = vi.fn(() => { Promise.resolve(true) });
-        const mockFindOne = vi.fn(() => Promise.resolve(null));
-        const User = vi.fn(() => ({ save: mockSave }));  
-        User.findOne = mockFindOne;
-        return { User }
-      }); 
-      const { signup: signupRestored } = await import("./actions");
-      signup = signupRestored;      
+    test("calls bcrypt.hash once", async () => {
+      const spy = vi.spyOn(bcrypt, "hash");
+      await createAccount(formData);
+      expect(spy).toHaveBeenCalledOnce();
     });
-
-    test("calls createVerificationToken", async () => {
-      const tokens = await import("@/lib/tokens");
+    test("calls createVerificationToken once", async () => {
       const spy = vi.spyOn(tokens, "createVerificationToken");
-      await signup(null, formData);
-      expect(spy).toHaveBeenCalledOnce();    
+      await createAccount(formData);
+      expect(spy).toHaveBeenCalledOnce();
     });
-
     test("calls sendEmail once", async () => {
       const spy = vi.spyOn(email, "sendEmail");
-      await signup(null, formData);
-      expect(spy).toHaveBeenCalledOnce();    
+      await createAccount(formData);
+      expect(spy).toHaveBeenCalledOnce();
+    });
+    test("calls redirect once", async () => {
+      const spy = vi.spyOn(nextNav, "redirect");
+      await createAccount(formData);
+      expect(spy).toHaveBeenCalledOnce();
+    });
+    test("redirects to /verify", async () => {
+      const spy = vi.spyOn(nextNav, "redirect");
+      await createAccount(formData);
+      expect(spy).toHaveBeenCalledWith("/verify");
     });
     
-    test("does not call Validator.getAllValues if successful", async () => {
-      const spy = vi.spyOn(Validator, "getAllValues");
-      await signup(null, formData);
-      expect(spy).toBeCalledTimes(0);  
+    test("returns { success: false, errors: 'No account data provided' } if no formData is provided", async () => {
+      const result = await createAccount();
+      expect(result).toHaveProperty("success");
+      expect(result.success).toBe(false);
+      expect(result).toHaveProperty("error");
+      expect(result.error).toBe("No account data provided");
+    });
+    test("returns { success: false } if firstName, lastName, email, password, confirmPassword, or terms is not defined", async () => {
+      formData.delete("email");
+      let result = await createAccount(formData);
+      expect(result).toHaveProperty("success");
+      expect(result.success).toBe(false);
+      formData.append("email", "email@email.com");
+    });
+    test("returns { success: false } if validation fails", async () => {
+      formData.set("email", "emailEmail.com");
+      const result = await createAccount(formData);     
+      expect(result).toHaveProperty("success");
+      expect(result.success).toBe(false);
+    });
+    test("returns validationErrors for invalid inputs only", async () => {
+      formData.set("password", "Password"); 
+      const result = await createAccount(formData);     
+      expect(result).toHaveProperty("validationErrors");
+      expect(result.validationErrors).toHaveProperty("email");
+      expect(result.validationErrors).toHaveProperty("password");
+      expect(result.validationErrors).toHaveProperty("confirmPassword");
+      expect(result.validationErrors).not.toHaveProperty("firstName");
+      expect(result.validationErrors).not.toHaveProperty("lastName");
+
+      expect(result.success).toBe(false);
+    });
+    test("returns prevValues validation fails", async () => {
+      const result = await createAccount(formData);
+      expect(result).toHaveProperty("prevValues");
+      Object.entries(result.prevValues).forEach(([key, val]) => {
+        expect(formData.get(key)).toEqual(val);
+      });
+      formData.set("email", "email@email.com");
+      formData.set("password", "P@ssword1"); 
+    });
+    test("returns { success: false } if database connection fails", async () => {
+      vi.resetModules();
+      vi.doMock("@/lib/database", () => ({
+        connectToDB: vi.fn(() => Promise.resolve(null)),
+      }));
+      const { createAccount: createWithNoDBConnection } = await import("./actions");
+      createAccount = createWithNoDBConnection;
+      const result = await createAccount(formData);
+      expect(result).toHaveProperty("success");
+      expect(result.success).toBe(false);
     });
 
-    test("redirects to /verify when successful", async () => {
-      const spy = vi.spyOn(nav, "redirect");
-      await signup(null, formData);    
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith("/verify");
+    test("returns 'Could not connect to database' error if database connection fails", async () => {
+      const result = await createAccount(formData);
+      expect(result).toHaveProperty("error");
+      expect(result.error).toBe("Could not connect to database");
+      vi.resetModules();
+      vi.doMock("@/lib/database", () => ({
+        connectToDB: vi.fn(() => Promise.resolve(true))
+      }));
+    });
+    test("returns prevValues if database connection fails", async () => {
+      const result = await createAccount(formData);
+      expect(result).toHaveProperty("prevValues");
+      Object.entries(result.prevValues).forEach(([key, val]) => {
+        expect(formData.get(key)).toEqual(val);
+      });
+    });
+    test("returns { success: false } if email is in use", async () => {
+      vi.resetModules();
+      vi.doMock("@/models/User", () => {
+        const mockSave = vi.fn(() => ({
+          _id: "userId",
+        }));
+        const mockFindOne = vi.fn(() => Promise.resolve(true));
+        const User = vi.fn(() => ({ save: mockSave }));
+        User.findOne = mockFindOne;
+        return { User };
+      });
+      const { createAccount: createDuplicateAccount } = await import("./actions"); 
+      createAccount = createDuplicateAccount;
+      const result = await createDuplicateAccount(formData);    
+      expect(result).toHaveProperty("success");
+      expect(result.success).toBe(false);
+    });
+    test("returns 'Email already in use' error if email is in use", async () => {
+      const result = await createAccount(formData);
+      expect(result).toHaveProperty("error");
+      expect(result.error).toBe("Email already in use");
+    });
+    test("returns prevValues if email is already in use", async () => {
+      const result = await createAccount(formData);
+      expect(result).toHaveProperty("prevValues");
+      Object.entries(result.prevValues).forEach(([key, val]) => {
+        expect(formData.get(key)).toEqual(val);
+      });
     });
   });
 });
