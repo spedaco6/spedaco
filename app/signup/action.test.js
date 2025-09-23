@@ -37,6 +37,7 @@ describe("Account actions", () => {
   describe("createAccount", () => {
     let formData = new FormData();
     beforeAll(() => {
+      vi.stubEnv("TOKEN_SECRET", "tempSecret");
       formData.append("firstName", "Test");
       formData.append("lastName", "Name");
       formData.append("email", "email@email.com");
@@ -48,6 +49,7 @@ describe("Account actions", () => {
     afterAll(() => {
       vi.resetAllMocks();
       vi.resetModules();
+      vi.unstubAllEnvs();
     });
     
     test("is defined", () => {

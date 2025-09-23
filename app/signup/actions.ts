@@ -54,8 +54,8 @@ export const createAccount = async (formData: FormData | Record<string, unknown>
     // encrypt password
     const hashedPassword = await bcrypt.hash(String(password.getValue()), SALT_ROUNDS);
     // create verification token
-    const verificationToken: string = createVerificationToken();
-    // create user
+    const verificationToken: string | null = createVerificationToken(String(email.getValue()));
+    
     const newUser = new User({
       firstName: validators.firstName.getValue(),
       lastName: validators.lastName.getValue(),
