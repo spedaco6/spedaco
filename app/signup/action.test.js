@@ -30,14 +30,15 @@ vi.mock("@/lib/database", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  redirect: vi.fn(() => true)
-}), { spy: true });
+  redirect: vi.fn(() => null)
+}));
 
 describe("Account actions", () => {
+  beforeAll(() => vi.stubEnv("TOKEN_SECRET", "tempSecret"));
+  afterAll(() => vi.unstubAllEnvs());
   describe("createAccount", () => {
     let formData = new FormData();
     beforeAll(() => {
-      vi.stubEnv("TOKEN_SECRET", "tempSecret");
       formData.append("firstName", "Test");
       formData.append("lastName", "Name");
       formData.append("email", "email@email.com");
@@ -49,7 +50,6 @@ describe("Account actions", () => {
     afterAll(() => {
       vi.resetAllMocks();
       vi.resetModules();
-      vi.unstubAllEnvs();
     });
     
     test("is defined", () => {
@@ -198,6 +198,12 @@ describe("Account actions", () => {
       Object.entries(result.prevValues).forEach(([key, val]) => {
         expect(formData.get(key)).toEqual(val);
       });
+    });
+  });
+  describe("verifyAccount", () => {
+    beforeEach(() => vi.clearAllMocks());
+    test("is defined", () => {
+      expect(accounts.verifyAccount).toBeDefined();
     });
   });
 });

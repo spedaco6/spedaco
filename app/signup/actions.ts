@@ -17,7 +17,6 @@ export interface FormResponse {
   prevValues?: Record<string, unknown>,
 }
 
-// is defined
 export const createAccount = async (formData: FormData | Record<string, unknown>): Promise<FormResponse> => {
   // CONFIRM DATA
   const expectedData = ["firstName*", "lastName*", "email*", "password*", "confirmPassword", "terms*"];
@@ -77,4 +76,19 @@ export const createAccount = async (formData: FormData | Record<string, unknown>
   }
 
   return redirect("/verify");
+}
+
+export const verifyAccount = async () => {
+}
+
+export const deleteAccount = async () => {
+
+}
+
+export const resetAccountPassword = async () => {
+
+}
+
+export const updateAccount = async () => {
+  
 }
