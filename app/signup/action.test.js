@@ -57,47 +57,47 @@ describe("Account actions", () => {
     });
     test("calls sanitize once", async () => {
       const spy = vi.spyOn(utils, "sanitize");
-      await createAccount({ test: "value" });
+      await createAccount(null, { test: "value" });
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls getAllValidators once", async () => {
       const spy = vi.spyOn(Validator, "getAllValidators");
-      await createAccount({ test: "value" });
+      await createAccount(null, { test: "value" });
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls connectToDB once", async () => {
       const spy = vi.spyOn(database, "connectToDB");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls User.findOne once", async () => {
       const spy = vi.spyOn(User, "findOne");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls bcrypt.hash once", async () => {
       const spy = vi.spyOn(bcrypt, "hash");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls createVerificationToken once", async () => {
       const spy = vi.spyOn(tokens, "createVerificationToken");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls sendEmail once", async () => {
       const spy = vi.spyOn(email, "sendEmail");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls redirect once", async () => {
       const spy = vi.spyOn(nextNav, "redirect");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
     test("redirects to /verify", async () => {
       const spy = vi.spyOn(nextNav, "redirect");
-      await createAccount(formData);
+      await createAccount(null, formData);
       expect(spy).toHaveBeenCalledWith("/verify");
     });
     
@@ -110,20 +110,20 @@ describe("Account actions", () => {
     });
     test("returns { success: false } if firstName, lastName, email, password, confirmPassword, or terms is not defined", async () => {
       formData.delete("email");
-      let result = await createAccount(formData);
+      let result = await createAccount(null, formData);
       expect(result).toHaveProperty("success");
       expect(result.success).toBe(false);
       formData.append("email", "email@email.com");
     });
     test("returns { success: false } if validation fails", async () => {
       formData.set("email", "emailEmail.com");
-      const result = await createAccount(formData);     
+      const result = await createAccount(null, formData);     
       expect(result).toHaveProperty("success");
       expect(result.success).toBe(false);
     });
     test("returns validationErrors for invalid inputs only", async () => {
       formData.set("password", "Password"); 
-      const result = await createAccount(formData);     
+      const result = await createAccount(null, formData);     
       expect(result).toHaveProperty("validationErrors");
       expect(result.validationErrors).toHaveProperty("email");
       expect(result.validationErrors).toHaveProperty("password");
@@ -134,7 +134,7 @@ describe("Account actions", () => {
       expect(result.success).toBe(false);
     });
     test("returns prevValues validation fails", async () => {
-      const result = await createAccount(formData);
+      const result = await createAccount(null, formData);
       expect(result).toHaveProperty("prevValues");
       Object.entries(result.prevValues).forEach(([key, val]) => {
         expect(formData.get(key)).toEqual(val);
@@ -149,13 +149,13 @@ describe("Account actions", () => {
       }));
       const { createAccount: createWithNoDBConnection } = await import("./actions");
       createAccount = createWithNoDBConnection;
-      const result = await createAccount(formData);
+      const result = await createAccount(null, formData);
       expect(result).toHaveProperty("success");
       expect(result.success).toBe(false);
     });
 
     test("returns 'Could not connect to database' error if database connection fails", async () => {
-      const result = await createAccount(formData);
+      const result = await createAccount(null, formData);
       expect(result).toHaveProperty("error");
       expect(result.error).toBe("Could not connect to database");
       vi.resetModules();
@@ -164,7 +164,7 @@ describe("Account actions", () => {
       }));
     });
     test("returns prevValues if database connection fails", async () => {
-      const result = await createAccount(formData);
+      const result = await createAccount(null, formData);
       expect(result).toHaveProperty("prevValues");
       Object.entries(result.prevValues).forEach(([key, val]) => {
         expect(formData.get(key)).toEqual(val);
@@ -188,12 +188,12 @@ describe("Account actions", () => {
       expect(result.success).toBe(false);
     });
     test("returns 'Email already in use' error if email is in use", async () => {
-      const result = await createAccount(formData);
+      const result = await createAccount(null, formData);
       expect(result).toHaveProperty("error");
       expect(result.error).toBe("Email already in use");
     });
     test("returns prevValues if email is already in use", async () => {
-      const result = await createAccount(formData);
+      const result = await createAccount(null, formData);
       expect(result).toHaveProperty("prevValues");
       Object.entries(result.prevValues).forEach(([key, val]) => {
         expect(formData.get(key)).toEqual(val);

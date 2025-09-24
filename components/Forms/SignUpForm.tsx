@@ -3,7 +3,7 @@ import React, { useActionState, useEffect, useMemo } from "react";
 import Input from "../Input";
 import useInput, { UseInputReturn } from "@/hooks/useInput";
 import { ValidationFn, Validator } from "@/lib/Validator";
-import { signup } from "@/app/signup/actions";
+import { createAccount } from "@/app/signup/actions";
 
 const IS_PASSWORD: ValidationFn[] = [Validator.isPassword()];
 const IS_EMAIL = [Validator.isEmail];
@@ -17,7 +17,7 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const valid_confirm_pass = useMemo(() => ([Validator.matches(password.value)]), [password.value]);
   const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
   const terms: UseInputReturn = useInput("terms*", false, [], { message: "Terms and conditions must be accepted"});
-  const [prevState, formAction, isPending] = useActionState(signup, {});
+  const [prevState, formAction, isPending] = useActionState(createAccount, {});
   
   useEffect(() => {
     console.log("UPDATE FROM VALUES ON RETURN OF PREV STATE");

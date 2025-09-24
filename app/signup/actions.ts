@@ -17,7 +17,7 @@ export interface FormResponse {
   prevValues?: Record<string, unknown>,
 }
 
-export const createAccount = async (formData: FormData | Record<string, unknown>): Promise<FormResponse> => {
+export const createAccount = async (_prevState: object, formData: FormData | Record<string, unknown>): Promise<FormResponse> => {
   // CONFIRM DATA
   const expectedData = ["firstName*", "lastName*", "email*", "password*", "confirmPassword", "terms*"];
   // returns success false if no data is provided
