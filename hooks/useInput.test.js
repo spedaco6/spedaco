@@ -101,67 +101,54 @@ describe("useInput hook", () => {
   describe("onReset events", () => {
     let hook;
     beforeEach(() => {
-      hook = renderHook(() => useInput("name", "initValue", [() => ({ isValid: false, errors: ["So many errors"] })])).result;
-      act(() => hook.current.onChange({ target: { value: "value" }}));
-      act(() => hook.current.onBlur());
+      hook = renderHook(() => useInput("name*", "initValue"));
+      act(() => hook.result.current.onChange({ target: { value: "value" }}));
+      act(() => hook.result.current.onBlur());
     });
     test("resets return value to intial value", () => {
-      act(() => hook.current.onReset());
-      expect(hook.current).toHaveProperty("value", "initValue");
+      act(() => hook.result.current.onReset());
+      expect(hook.result.current).toHaveProperty("value", "initValue");
     });
     test("resets return errors to empty array", () => {
-      expect(hook.current).toHaveProperty("errors");
-      expect(hook.current.errors).toHaveLength(1);
-      act(() => hook.current.onReset());
-      expect(hook.current).toHaveProperty("errors");
-      expect(hook.current.errors).toHaveLength(0);
+      act(() => hook.result.current.onChange({ target: { value: "" }}));
+      expect(hook.result.current).toHaveProperty("errors");
+      expect(hook.result.current.errors).toHaveLength(1);
+      act(() => hook.result.current.onReset());
+      expect(hook.result.current).toHaveProperty("errors");
+      expect(hook.result.current.errors).toHaveLength(0);
     });
-    test("does not reset errors when passed false", () => {
-      act(() => hook.current.onReset(false));
-      expect(hook.current).toHaveProperty("errors");
-      expect(hook.current.errors).toHaveLength(1);
-    })
     test("resets blurred to false", () => {
-      act(() => hook.current.onReset());
-      expect(hook.current).toHaveProperty("blurred", false);
+      act(() => hook.result.current.onReset());
+      expect(hook.result.current).toHaveProperty("blurred", false);
     });
     test("resets touched to false", () => {
-      act(() => hook.current.onReset());
-      expect(hook.current).toHaveProperty("touched", false);
-    });
-  });
-  
-  describe("addErrors", () => {
-    let hook;
-    beforeEach(() => {
-      hook = renderHook(() => useInput("test*", ""));
-      act(() => hook.result.current.onChange({ target: { value: "something" }}));
-      act(() => hook.result.current.onBlur());
+      act(() => hook.result.current.onReset());
+      expect(hook.result.current).toHaveProperty("touched", false);
     });
     test("sets blurred and touched to true", () => {
       act(() => hook.result.current.onReset());
       expect(hook.result.current.blurred).toBe(false);
       expect(hook.result.current.touched).toBe(false);
-      act(() => hook.result.current.addErrors("Error"));
+      act(() => hook.result.current.onReset("Error"));
       expect(hook.result.current.blurred).toBe(true);
       expect(hook.result.current.touched).toBe(true);
     });
     test("replaces errors array with array containing string value when argument is typeof string", () => {
       expect(hook.result.current.errors).toHaveLength(0);
-      act(() => hook.result.current.addErrors("This is a new error"));
+      act(() => hook.result.current.onReset("This is a new error"));
       expect(hook.result.current.errors).toHaveLength(1);
       expect(hook.result.current.errors.includes("This is a new error")).toBe(true);
     });
     test("replaces errors array with new errors array when argument is typeof object", () => {
       expect(hook.result.current.errors).toHaveLength(0);
-      act(() => hook.result.current.addErrors(["This is a new error", "This is another error"]));
+      act(() => hook.result.current.onReset(["This is a new error", "This is another error"]));
       expect(hook.result.current.errors).toHaveLength(2);
       expect(hook.result.current.errors.includes("This is a new error")).toBe(true);
       expect(hook.result.current.errors.includes("This is another error")).toBe(true);
     });
     test("Errors are replaced when input is subsequently changed", () => {
       expect(hook.result.current.errors).toHaveLength(0);
-      act(() => hook.result.current.addErrors(["This is a new error", "This is another error"]));
+      act(() => hook.result.current.onReset(["This is a new error", "This is another error"]));
       expect(hook.result.current.errors).toHaveLength(2);
       act(() => hook.result.current.onChange({ target: { value: "" }}));
       expect(hook.result.current.errors).toHaveLength(1);
@@ -171,7 +158,7 @@ describe("useInput hook", () => {
     test("Errors are cleared when no argument is passed", () => {
       act(() => hook.result.current.onChange({ target: { value: "" }}));
       expect(hook.result.current.errors).toHaveLength(1);
-      act(() => hook.result.current.addErrors());
+      act(() => hook.result.current.onReset());
       expect(hook.result.current.errors).toHaveLength(0);
     });
     test("Options message displayed if provided", () => {
@@ -180,7 +167,7 @@ describe("useInput hook", () => {
       act(() => hook2.result.current.onBlur());
       act(() => hook2.result.current.onChange({ target: { value: "" }}));
       expect(hook2.result.current.errors).toHaveLength(1);
-      act(() => hook2.result.current.addErrors("This error should not display"));
+      act(() => hook2.result.current.onReset("This error should not display"));
       expect(hook2.result.current.errors.includes("This error should display")).toBe(true);
       expect(hook2.result.current.errors.includes("This error should not display")).toBe(false);
     });

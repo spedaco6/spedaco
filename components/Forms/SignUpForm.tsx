@@ -22,19 +22,21 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   
   useEffect(() => {
     if (prevState?.success === false && prevState?.validationErrors) {
-      const form: Record<string, ((error: string | string[]) => void)> = { 
-        firstName: firstName.addErrors, 
-        lastName: lastName.addErrors, 
-        email: email.addErrors, 
-        password: password.addErrors, 
-        confirmPassword: confirmPassword.addErrors, 
-        terms: terms.addErrors, 
+      const form: Record<string, ((error?: string | string[]) => void)> = { 
+        firstName: firstName.onReset, 
+        lastName: lastName.onReset, 
+        email: email.onReset, 
+        password: password.onReset, 
+        confirmPassword: confirmPassword.onReset, 
+        terms: terms.onReset, 
       };
+      form["password"]();
+      form["confirmPassword"]();
       Object.entries(prevState.validationErrors).forEach(([key, val]) => {
         form[key](val);
       });
     }
-  }, [prevState, firstName.addErrors, lastName.addErrors, email.addErrors, password.addErrors, confirmPassword.addErrors, terms.addErrors]);
+  }, [prevState, firstName.onReset, lastName.onReset, email.onReset, password.onReset, confirmPassword.onReset, terms.onReset]);
 
   return <form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
     <h2 className="text-2xl">Sign Up</h2>
@@ -43,11 +45,13 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
       <Input disabled={isPending} title="Last Name" hook={lastName} />
     </div>
     <Input disabled={isPending} title="Email" hook={email} />
-    <Input disabled={isPending} title="New Password" type="password" hook={password} />
-    <Input disabled={isPending} title="Confirm Password" type="password" hook={confirmPassword} />
+    <div className="flex gap-2">
+      <Input disabled={isPending} title="New Password" type="password" hook={password} />
+      <Input disabled={isPending} title="Confirm Password" type="password" hook={confirmPassword} />
+    </div>
     <Input disabled={isPending} title="Accept the terms and conditions" type="checkbox" hook={terms} />
     <div className="flex justify-end m-2 mt-4">
-      <button>{isPending ? "Sending request..." : "Sign up"}</button>
+      <button disabled={isPending}>{isPending ? "Sending request..." : "Sign up"}</button>
     </div>
   </form>
 }

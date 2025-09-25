@@ -12,8 +12,7 @@ export type UseInputReturn = {
   blurred: boolean,
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onBlur: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  onReset: () => void,
-  addErrors: (newErrors: string | string[]) => void,
+  onReset: (error?: string | string[]) => void,
   validate: () => void,
 }
 
@@ -131,22 +130,23 @@ export default function useInput(
   }, [validate, condition]);
 
 
-  // Reset everything to initState. Preserve errors by passing false
-  const onReset = useCallback((resetErrors: boolean = true): void => {
+  // Reset everything to initState. Error string or array can be provided
+  const onReset = useCallback((newErrors?: string | string[]): void => {
+    const resetErrors = message ? [message] :
+    typeof newErrors === "string" ? [newErrors] :
+    typeof newErrors === "object" ? [...newErrors] :
+    [];
+    const hasErrors = resetErrors.length > 0;
+    setErrors(resetErrors);
+    setCondition({ touched: hasErrors, blurred: hasErrors });
+    setValue(initValue);
+  }, [initValue, message]);
+
+  /* const onReset = useCallback((resetErrors: boolean = true): void => {
     setValue(initValue);
     setCondition({ blurred: false, touched: false });
     if (resetErrors) setErrors([]);
-  }, [initValue]);
-
-  // addErrors can update errors for a particular input
-  const addErrors = useCallback((newErrors: string | string[] = []): void => {
-    const primaryErrors = message ? [message] :
-      typeof newErrors === "string" ? [newErrors] :
-      typeof newErrors === "object" ? [...newErrors] :
-      [];
-    setErrors(primaryErrors);
-    setCondition({ touched: true, blurred: true });
-  }, [message]);
+  }, [initValue]); */
 
   useEffect(() => {
     if (condition.blurred && dependencyString.length > 0) {
@@ -165,7 +165,6 @@ export default function useInput(
     onChange: isBoolean ? onToggle : onChange,
     onBlur,
     onReset,
-    addErrors,
     validate,
   }
 }
