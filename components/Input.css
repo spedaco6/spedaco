@@ -53,15 +53,15 @@
     outline-color: var(--color-error-500);
     background-color: var(--color-error-100);
   }
-
+  
+    .input-container .input-errors {
+      margin-top: .5rem;
+    }
+  
   /* Disabled Styles */
   .input-container.disabled label {
     color: var(--color-disabled);
     user-select: none;
-  }
-
-  .input-container .input-errors {
-    margin-top: .5rem;
   }
   
   .input-conatiner.disabled input,

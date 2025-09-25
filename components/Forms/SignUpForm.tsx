@@ -39,13 +39,13 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   return <form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
     <h2 className="text-2xl">Sign Up</h2>
     <div className="flex gap-2">
-      <Input title="First Name" hook={firstName} disabled={isPending} autoFocus />
-      <Input title="Last Name" hook={lastName} />
+      <Input disabled={isPending} title="First Name" hook={firstName} autoFocus />
+      <Input disabled={isPending} title="Last Name" hook={lastName} />
     </div>
-    <Input title="Email" hook={email} />
-    <Input title="New Password" type="password" hook={password} />
-    <Input title="Confirm Password" type="password" hook={confirmPassword} />
-    <Input title="Accept the terms and conditions" type="checkbox" hook={terms} />
+    <Input disabled={isPending} title="Email" hook={email} />
+    <Input disabled={isPending} title="New Password" type="password" hook={password} />
+    <Input disabled={isPending} title="Confirm Password" type="password" hook={confirmPassword} />
+    <Input disabled={isPending} title="Accept the terms and conditions" type="checkbox" hook={terms} />
     <div className="flex justify-end m-2 mt-4">
       <button>{isPending ? "Sending request..." : "Sign up"}</button>
     </div>
