@@ -130,6 +130,62 @@ describe("useInput hook", () => {
       expect(hook.current).toHaveProperty("touched", false);
     });
   });
+  
+  describe("addErrors", () => {
+    let hook;
+    beforeEach(() => {
+      hook = renderHook(() => useInput("test*", ""));
+      act(() => hook.result.current.onChange({ target: { value: "something" }}));
+      act(() => hook.result.current.onBlur());
+    });
+    test("sets blurred and touched to true", () => {
+      act(() => hook.result.current.onReset());
+      expect(hook.result.current.blurred).toBe(false);
+      expect(hook.result.current.touched).toBe(false);
+      act(() => hook.result.current.addErrors("Error"));
+      expect(hook.result.current.blurred).toBe(true);
+      expect(hook.result.current.touched).toBe(true);
+    });
+    test("replaces errors array with array containing string value when argument is typeof string", () => {
+      expect(hook.result.current.errors).toHaveLength(0);
+      act(() => hook.result.current.addErrors("This is a new error"));
+      expect(hook.result.current.errors).toHaveLength(1);
+      expect(hook.result.current.errors.includes("This is a new error")).toBe(true);
+    });
+    test("replaces errors array with new errors array when argument is typeof object", () => {
+      expect(hook.result.current.errors).toHaveLength(0);
+      act(() => hook.result.current.addErrors(["This is a new error", "This is another error"]));
+      expect(hook.result.current.errors).toHaveLength(2);
+      expect(hook.result.current.errors.includes("This is a new error")).toBe(true);
+      expect(hook.result.current.errors.includes("This is another error")).toBe(true);
+    });
+    test("Errors are replaced when input is subsequently changed", () => {
+      expect(hook.result.current.errors).toHaveLength(0);
+      act(() => hook.result.current.addErrors(["This is a new error", "This is another error"]));
+      expect(hook.result.current.errors).toHaveLength(2);
+      act(() => hook.result.current.onChange({ target: { value: "" }}));
+      expect(hook.result.current.errors).toHaveLength(1);
+      expect(hook.result.current.errors.includes("This is a new error")).toBe(false);
+      expect(hook.result.current.errors.includes("This is another error")).toBe(false);
+    });
+    test("Errors are cleared when no argument is passed", () => {
+      act(() => hook.result.current.onChange({ target: { value: "" }}));
+      expect(hook.result.current.errors).toHaveLength(1);
+      act(() => hook.result.current.addErrors());
+      expect(hook.result.current.errors).toHaveLength(0);
+    });
+    test("Options message displayed if provided", () => {
+      const hook2 = renderHook(() => useInput("test*", "", [], { message: "This error should display"}));
+      act(() => hook2.result.current.onChange({ target: { value: "something" }}));
+      act(() => hook2.result.current.onBlur());
+      act(() => hook2.result.current.onChange({ target: { value: "" }}));
+      expect(hook2.result.current.errors).toHaveLength(1);
+      act(() => hook2.result.current.addErrors("This error should not display"));
+      expect(hook2.result.current.errors.includes("This error should display")).toBe(true);
+      expect(hook2.result.current.errors.includes("This error should not display")).toBe(false);
+    });
+  });
+  
   describe("boolean values", () => {
     test("will return boolean values", () => {
       const hook = renderHook(() => useInput("test", true));

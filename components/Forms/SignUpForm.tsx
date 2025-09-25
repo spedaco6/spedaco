@@ -10,19 +10,31 @@ const IS_EMAIL = [Validator.isEmail];
 
 export default function SignUpForm({ className="" }: React.PropsWithChildren<{ className?: string }>): React.ReactElement {
   
-  const firstName: UseInputReturn = useInput("firstName*");
-  const lastName: UseInputReturn = useInput("lastName*");
+  const firstName: UseInputReturn = useInput("firstName");
+  const lastName: UseInputReturn = useInput("lastName");
   const email: UseInputReturn = useInput("email", "", IS_EMAIL);
-  const password: UseInputReturn = useInput("password");
+  const password: UseInputReturn = useInput("password", "", IS_PASSWORD);
   const valid_confirm_pass = useMemo(() => ([Validator.matches(password.value)]), [password.value]);
   const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
-  const terms: UseInputReturn = useInput("terms*", false, [], { message: "Terms and conditions must be accepted"});
+  const terms: UseInputReturn = useInput("terms", false, [], { message: "Terms and conditions must be accepted"});
   const [prevState, formAction, isPending] = useActionState(createAccount, {});
   
+  
   useEffect(() => {
-    console.log("UPDATE FROM VALUES ON RETURN OF PREV STATE");
-    console.log(prevState);
-  }, [prevState]);
+    if (prevState?.success === false && prevState?.validationErrors) {
+      const form: Record<string, ((error: string | string[]) => void)> = { 
+        firstName: firstName.addErrors, 
+        lastName: lastName.addErrors, 
+        email: email.addErrors, 
+        password: password.addErrors, 
+        confirmPassword: confirmPassword.addErrors, 
+        terms: terms.addErrors, 
+      };
+      Object.entries(prevState.validationErrors).forEach(([key, val]) => {
+        form[key](val);
+      });
+    }
+  }, [prevState, firstName.addErrors, lastName.addErrors, email.addErrors, password.addErrors, confirmPassword.addErrors, terms.addErrors]);
 
   return <form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
     <h2 className="text-2xl">Sign Up</h2>

@@ -13,6 +13,7 @@ export type UseInputReturn = {
   onChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onBlur: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   onReset: () => void,
+  addErrors: (newErrors: string | string[]) => void,
   validate: () => void,
 }
 
@@ -137,6 +138,16 @@ export default function useInput(
     if (resetErrors) setErrors([]);
   }, [initValue]);
 
+  // addErrors can update errors for a particular input
+  const addErrors = useCallback((newErrors: string | string[] = []): void => {
+    const primaryErrors = message ? [message] :
+      typeof newErrors === "string" ? [newErrors] :
+      typeof newErrors === "object" ? [...newErrors] :
+      [];
+    setErrors(primaryErrors);
+    setCondition({ touched: true, blurred: true });
+  }, [message]);
+
   useEffect(() => {
     if (condition.blurred && dependencyString.length > 0) {
       const result = validate();
@@ -154,6 +165,7 @@ export default function useInput(
     onChange: isBoolean ? onToggle : onChange,
     onBlur,
     onReset,
+    addErrors,
     validate,
   }
 }
