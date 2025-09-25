@@ -286,5 +286,36 @@ describe("Input component", () => {
         expect(input).toHaveValue("Selected");
       });
     });
+    describe("Resetting behaviour", () => {
+      test("Displays reset error", async () => {
+        const hook = renderHook(() => useInput("test", ""));
+        const { rerender } = render(<Input hook={hook.result.current} title="Test" />);
+        act(() => hook.result.current.onReset("This is an error"));
+        rerender(<Input hook={hook.result.current} title="Test" />);
+        const error = await screen.findByText("This is an error");
+        expect(error).toBeInTheDocument();
+      });
+      test("Displays multiple reset errors", async () => {
+        const hook = renderHook(() => useInput("test", ""));
+        const { rerender } = render(<Input hook={hook.result.current} title="Test" />);
+        act(() => hook.result.current.onReset(["This is an error", "This is another error"]));
+        rerender(<Input hook={hook.result.current} title="Test" />);
+        const error = await screen.findByText("This is an error");
+        const error2 = await screen.findByText("This is another error");
+        expect(error).toBeInTheDocument();
+        expect(error2).toBeInTheDocument();
+      });
+      test("Errors disappear on subsequent change", () => {
+        const hook = renderHook(() => useInput("test", ""));
+        const { rerender } = render(<Input hook={hook.result.current} title="Test" />);
+        act(() => hook.result.current.onReset(["This is an error", "This is another error"]));
+        act(() => hook.result.current.onChange({ target: { value: "Something" }}));
+        rerender(<Input hook={hook.result.current} title="Test" />);
+        const error = screen.queryByText("This is an error");
+        const error2 = screen.queryByText("This is another error");
+        expect(error).not.toBeInTheDocument();
+        expect(error2).not.toBeInTheDocument();
+      });
+    });
   });
 });

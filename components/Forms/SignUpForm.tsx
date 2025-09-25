@@ -30,8 +30,6 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
         confirmPassword: confirmPassword.onReset, 
         terms: terms.onReset, 
       };
-      form["password"]();
-      form["confirmPassword"]();
       Object.entries(prevState.validationErrors).forEach(([key, val]) => {
         form[key](val);
       });
@@ -40,6 +38,7 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
 
   return <form className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} action={formAction}>
     <h2 className="text-2xl">Sign Up</h2>
+    { prevState?.error && <p className="text-error mt-2">{prevState.error}</p> }
     <div className="flex gap-2">
       <Input disabled={isPending} title="First Name" hook={firstName} autoFocus />
       <Input disabled={isPending} title="Last Name" hook={lastName} />
