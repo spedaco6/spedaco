@@ -33,6 +33,10 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(() => null)
 }));
 
+vi.mock("@/lib/email", () => ({
+  sendVerificationEmail: vi.fn(() => Promise.resolve({ messageId: "123" }))
+}))
+
 describe("Account actions", () => {
   beforeAll(() => vi.stubEnv("TOKEN_SECRET", "tempSecret"));
   afterAll(() => vi.unstubAllEnvs());
@@ -85,9 +89,10 @@ describe("Account actions", () => {
       await createAccount(null, formData);
       expect(spy).toHaveBeenCalledOnce();
     });
-    test("calls sendEmail once", async () => {
-      const spy = vi.spyOn(email, "sendEmail");
+    test("calls sendVerificationEmail once", async () => {
+      const spy = vi.spyOn(email, "sendVerificationEmail");
       await createAccount(null, formData);
+      expect(spy).toHaveResolvedWith({ messageId: "123" });
       expect(spy).toHaveBeenCalledOnce();
     });
     test("calls redirect once", async () => {

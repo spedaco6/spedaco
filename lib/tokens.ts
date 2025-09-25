@@ -5,9 +5,9 @@ export interface DecodedVerificationToken extends JwtPayload{
   intent: string,
 }
 
-export const createVerificationToken = (email: string): string | null => {
+export const createVerificationToken = (email: string): string => {
   // ensure id exists
-  if (!email || typeof email !== "string") return null;
+  if (!email || typeof email !== "string") return "";
   const token = jwt.sign({
     email, 
     intent: "email_verification" 

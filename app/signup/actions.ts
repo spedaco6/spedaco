@@ -2,7 +2,7 @@
 
 import { SALT_ROUNDS } from "@/lib/config";
 import { connectToDB } from "@/lib/database";
-import { sendEmail } from "@/lib/email";
+import { sendVerificationEmail } from "@/lib/email";
 import { createVerificationToken } from "@/lib/tokens";
 import { sanitize } from "@/lib/utils";
 import { Validator, AllValidators, AllValidity, AllValues } from "@/lib/Validator";
@@ -53,13 +53,14 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
     // encrypt password
     const hashedPassword = await bcrypt.hash(String(password.getValue()), SALT_ROUNDS);
     // create verification token
-    const verificationToken: string | null = createVerificationToken(String(email.getValue()));
+    const verificationToken: string = createVerificationToken(String(email.getValue()));
     
     const newUser = new User({
       firstName: validators.firstName.getValue(),
       lastName: validators.lastName.getValue(),
       email: validators.email.getValue(),
       password: hashedPassword,
+      terms: validators.terms.getValue(),
       role: 'user',
       verified: false,
       verificationToken,
@@ -68,7 +69,7 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
     await newUser.save();
 
     // Send verification email
-    await sendEmail();
+    await sendVerificationEmail(newUser.email, newUser.verificationToken);
   } catch (err) {
     console.error(err);
     const message: string = err instanceof Error ? err.message : "Something went wrong";
