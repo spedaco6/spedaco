@@ -1,4 +1,3 @@
-import "server-only";
 import nodemailer from "nodemailer";
 
 // Create a test account or replace with real credentials.
@@ -21,6 +20,20 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     text: "Verify your account by clicking the link below", // plain‑text body
     html: `<h1>Verify your account</h1>
       <p>Verify your account now by clicking the link below</p>
+      <a href="http://localhost:3000/verify?token=${token}">Verify Now</a>
+    `, // HTML body
+  });
+  return info;
+}
+
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  const info = await transporter.sendMail({
+    from: '"Maddison Foo Koch" <maddison53@ethereal.email>',
+    to: email,
+    subject: "Password reset requested",
+    text: "Reset your password by clicking the link below", // plain‑text body
+    html: `<h1>Reset your password</h1>
+      <p>Reset your password by clicking the link below</p>
       <a href="http://localhost:3000/verify?token=${token}">Verify Now</a>
     `, // HTML body
   });

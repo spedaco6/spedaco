@@ -1,6 +1,4 @@
-import "server-only";
 import mongoose from "mongoose";
-
 
 let dbConnection: typeof mongoose | null = null;
 

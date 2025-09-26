@@ -10,6 +10,7 @@ export interface IUser extends Document {
   role: UserRole, 
   terms: boolean,
   verificationToken: string,
+  passwordResetToken: string,
 }
 
 const schema = new Schema<IUser>({
@@ -26,6 +27,7 @@ const schema = new Schema<IUser>({
   },
   terms: { type: Boolean, required: true },
   verificationToken: String,
+  passwordResetToken: String,
 }, { timestamps: true });
 
 export const User = models.User || model<IUser>("User", schema);
