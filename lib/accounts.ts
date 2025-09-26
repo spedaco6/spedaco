@@ -2,12 +2,14 @@ import { IUser, User } from "@/models/User";
 import { createPasswordResetToken } from "./tokens";
 import { sendPasswordResetEmail } from "./email";
 
-interface AccountActionResponse {
+export interface AccountActionResponse {
   success: boolean,
   error?: string,
   validationErrors?: Record<string, string[]>,
   prevValues?: Record<string, unknown>,
+  user?: Partial<IUser>,
 }
+
 export const forgotPassword = async (email: string): Promise<AccountActionResponse> => {
   // Ensure form data exists and is sanitized
   if (!email || typeof email !== "string") return { success: false, error: "Invalid email" };
@@ -41,6 +43,6 @@ export const forgotPassword = async (email: string): Promise<AccountActionRespon
     return { success: false, error: "Could not send reset email at this time. Try again later" };
   }
   
-  // Redirect user
-  return { success: true };
+  // Return success with updated user object
+  return { success: true, user };
 }
