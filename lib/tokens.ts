@@ -4,6 +4,10 @@ export interface DecodedVerificationToken extends JwtPayload{
   userId: string,
   intent: string,
 }
+export interface DecodedPasswordResetToken extends JwtPayload{
+  userId: string,
+  intent: string,
+}
 
 export const createVerificationToken = (userId: string): string => {
   // ensure id exists
@@ -37,4 +41,17 @@ export const createPasswordResetToken = (userId: string): string => {
   }, process.env.TOKEN_SECRET!, { expiresIn: "15m" });  
 
   return token;
+}
+
+export const verifyPasswordResetToken = (token?: string): DecodedPasswordResetToken | boolean => {
+  if (!token || typeof token !== "string") return false;
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as DecodedPasswordResetToken;
+    if (!decoded) return false;
+    if (decoded?.intent !== "password_reset") return false;
+    return decoded;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
