@@ -37,11 +37,13 @@ vi.mock("@/lib/email", () => ({
   sendVerificationEmail: vi.fn(() => Promise.resolve({ messageId: "123" }))
 }));
 
-// Stifle testing error logs
-vi.spyOn(console, "error").mockImplementation(() => {});
 
 describe("Account actions", () => {
-  beforeAll(() => vi.stubEnv("TOKEN_SECRET", "tempSecret"));
+  beforeAll(() => {
+    vi.stubEnv("TOKEN_SECRET", "tempSecret");
+    // Stifle testing error logs
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
   afterAll(() => vi.unstubAllEnvs());
   describe("createAccount", () => {
     let formData = new FormData();
@@ -161,7 +163,7 @@ describe("Account actions", () => {
       expect(result).toHaveProperty("success");
       expect(result.success).toBe(false);
     });
-
+    
     test("returns 'Could not connect to database' error if database connection fails", async () => {
       const result = await createAccount(null, formData);
       expect(result).toHaveProperty("error");
@@ -209,7 +211,11 @@ describe("Account actions", () => {
     });
   });
 
-  describe.only("verifyAccount", () => {
+  describe("verifyAccount", () => {
+    beforeAll(() => {
+      // Stifle testing error logs
+      vi.spyOn(console, "error").mockImplementation(() => {});
+    });
     beforeEach(() => { vi.clearAllMocks() });
     afterAll(() => {
       vi.resetAllMocks();
