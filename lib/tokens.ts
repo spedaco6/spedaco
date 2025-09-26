@@ -27,3 +27,14 @@ export const verifyVerificationToken = (token?: string): DecodedVerificationToke
     return false;
   }
 }
+
+export const createPasswordResetToken = (userId: string): string => {
+  // ensure id exists
+  if (!userId || typeof userId !== "string") return "";
+  const token = jwt.sign({
+    userId, 
+    intent: "password_reset" 
+  }, process.env.TOKEN_SECRET!, { expiresIn: "15m" });  
+
+  return token;
+}
