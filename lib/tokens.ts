@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 export interface DecodedVerificationToken extends JwtPayload{
-  email: string,
+  userId: string,
   intent: string,
 }
 

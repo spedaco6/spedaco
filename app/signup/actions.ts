@@ -3,7 +3,7 @@
 import { SALT_ROUNDS } from "@/lib/config";
 import { connectToDB } from "@/lib/database";
 import { sendVerificationEmail } from "@/lib/email";
-import { createVerificationToken } from "@/lib/tokens";
+import { createVerificationToken, DecodedVerificationToken, verifyVerificationToken } from "@/lib/tokens";
 import { sanitize } from "@/lib/utils";
 import { Validator, AllValidators, AllValidity, AllValues } from "@/lib/Validator";
 import { User } from "@/models/User";
@@ -80,7 +80,31 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
   return redirect("/verify");
 }
 
-export const verifyAccount = async () => {
+export const verifyAccount = async (token: string): Promise<boolean> => {
+  // Ensure token is defined and type string
+  if (!token || typeof token !== "string") return false;
+  
+  // Decode token
+  let decoded;
+  try {
+    decoded = verifyVerificationToken(token) as DecodedVerificationToken;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+
+  // If no token, retur false
+  if (!decoded) return false;
+  const user = await User.findById(decoded?.userId);
+  if (!user) return false;
+  if (user?.verificationToken !== token) return false;
+
+  // Update and save user
+  user.verified = true;
+  user.verificationToken = undefined;
+  await user.save();
+
+  return user;
 }
 
 export const deleteAccount = async () => {
