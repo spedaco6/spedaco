@@ -12,7 +12,6 @@ export default function RedirectTimer({ time = 3, hidden = false, href="/", mess
       }, 1000);
     }
     if (remainingTime === 0) {
-      if (timeoutId) clearTimeout(timeoutId);
       redirect(href);
     }
     return () => { if (timeoutId) clearTimeout(timeoutId) };

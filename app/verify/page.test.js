@@ -1,9 +1,13 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import VerifyPage from "./page";
 import * as actions from "./actions";
 import { render, screen, waitFor } from "@testing-library/react";
 
 describe("verify page", () => {
+  afterAll(() => {
+    vi.resetAllMocks();
+    vi.resetModules();
+  });
   vi.mock("@/components/RedirectTimer", () => ({
     default: vi.fn(() => {}),
   }));
