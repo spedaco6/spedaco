@@ -52,9 +52,6 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
     // COMPLETE ACTION
     // encrypt password
     const hashedPassword = await bcrypt.hash(String(password.getValue()), SALT_ROUNDS);
-    // create verification token
-    const verificationToken: string = createVerificationToken(String(email.getValue()));
-    
     const newUser = new User({
       firstName: validators.firstName.getValue(),
       lastName: validators.lastName.getValue(),
@@ -63,11 +60,15 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
       terms: validators.terms.getValue(),
       role: 'user',
       verified: false,
-      verificationToken,
     });
     // save user
     await newUser.save();
 
+    // create verification token
+    const verificationToken: string = createVerificationToken(String(newUser._id));
+    newUser.verificationToken = verificationToken;
+    await newUser.save();
+    
     // Send verification email
     await sendVerificationEmail(newUser.email, newUser.verificationToken);
   } catch (err) {

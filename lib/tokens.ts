@@ -5,11 +5,11 @@ export interface DecodedVerificationToken extends JwtPayload{
   intent: string,
 }
 
-export const createVerificationToken = (email: string): string => {
+export const createVerificationToken = (userId: string): string => {
   // ensure id exists
-  if (!email || typeof email !== "string") return "";
+  if (!userId || typeof userId !== "string") return "";
   const token = jwt.sign({
-    email, 
+    userId, 
     intent: "email_verification" 
   }, process.env.TOKEN_SECRET!, { expiresIn: "15m" });  
 
