@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 import nodemailer from "nodemailer";
 
 // Create a test account or replace with real credentials.
@@ -13,7 +13,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Wrap in an async IIFE so we can use await.
 export const sendVerificationEmail = async (email: string, token: string) => {
   const info = await transporter.sendMail({
     from: '"Maddison Foo Koch" <maddison53@ethereal.email>',

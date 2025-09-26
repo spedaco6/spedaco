@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React from "react";
 import { verifyAccount } from "./actions";
+import RedirectTimer from "@/components/RedirectTimer";
 
 export default async function VerifyPage({ searchParams }: 
   { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<React.ReactElement> {
@@ -17,8 +18,9 @@ export default async function VerifyPage({ searchParams }:
 
   return <main>
     { hasToken && isVerified && <>
+      <h1>Account verified successfully!</h1>
       <p>Thank you for verifying your account</p> 
-      <Link href="/login">Go to Login</Link>
+      <RedirectTimer href="/login" />
     </> }
     { hasToken && !isVerified && <>
       <p>There was a problem verifying your account</p>
