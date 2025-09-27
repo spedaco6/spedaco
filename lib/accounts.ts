@@ -10,7 +10,7 @@ export interface AccountActionResponse {
   user?: Partial<IUser>,
 }
 
-export const forgotPassword = async (email: string): Promise<AccountActionResponse> => {
+export const submitPasswordResetRequest = async (email: string): Promise<AccountActionResponse> => {
   // Ensure form data exists and is sanitized
   if (!email || typeof email !== "string") return { success: false, error: "Invalid email" };
   

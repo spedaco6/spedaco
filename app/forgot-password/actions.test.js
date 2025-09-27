@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { submitResetPasswordRequest } from "./actions";
+import { forgotPassword } from "./actions";
 import { redirect } from "next/navigation";
-import { forgotPassword } from "@/lib/accounts";
+import { submitPasswordResetRequest } from "@/lib/accounts";
 
 vi.mock("@/lib/accounts", () => ({
-  forgotPassword: vi.fn(() => Promise.resolve({ success: true })),
+  submitPasswordResetRequest: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -23,16 +23,16 @@ describe("forgotPassword", () => {
   });
 
   test("returns false if no data is provided", async () => {
-    const result = await submitResetPasswordRequest();
+    const result = await forgotPassword();
     expect(result).toHaveProperty("success", false);
   });
-  test("returns false if forgotPassword is unsuccessful", async () => {
-    forgotPassword.mockImplementationOnce(() => Promise.resolve({ success: false, error: "Error message" }));
-    const result = await submitResetPasswordRequest(null, formData);
+  test("returns false if submitPasswordResetRequest is unsuccessful", async () => {
+    submitPasswordResetRequest.mockImplementationOnce(() => Promise.resolve({ success: false, error: "Error message" }));
+    const result = await forgotPassword(null, formData);
     expect(result).toHaveProperty("success", false);
   });
   test("calls redirect once when successful", async () => {
-    await submitResetPasswordRequest(null, formData);
+    await forgotPassword(null, formData);
     expect(redirect).toHaveBeenCalledOnce();
     expect(redirect).toHaveBeenCalledWith("/verify");
   });
