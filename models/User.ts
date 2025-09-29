@@ -9,8 +9,8 @@ export interface IUser extends Document {
   verified: boolean,
   role: UserRole, 
   terms: boolean,
-  verificationToken: string,
-  passwordResetToken: string,
+  verificationToken?: string,
+  passwordResetToken?: string,
 }
 
 const schema = new Schema<IUser>({
