@@ -35,6 +35,7 @@ export default async function VerifyPage({ searchParams }:
     </> }
     { mode === "reset-success" && <>
       <p>Your password has been reset successfully!</p>
+      <RedirectTimer href="/login" />
     </> }
   </main>
 }
