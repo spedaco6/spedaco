@@ -17,7 +17,7 @@ export default function SignUpForm({ className="" }: React.PropsWithChildren<{ c
   const valid_confirm_pass = useMemo(() => ([Validator.matches(password.value)]), [password.value]);
   const confirmPassword: UseInputReturn = useInput("confirmPassword", "", valid_confirm_pass, { dependencies: [password.value] });
   const terms: UseInputReturn = useInput("terms", false, [], { message: "Terms and conditions must be accepted"});
-  const [prevState, formAction, isPending] = useActionState(createAccount, {});
+  const [prevState, formAction, isPending] = useActionState(createAccount, { success: false });
   
   
   useEffect(() => {

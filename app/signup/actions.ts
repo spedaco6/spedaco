@@ -1,5 +1,6 @@
 'use server';
 
+import { AccountActionResponse } from "@/lib/accounts";
 import { SALT_ROUNDS } from "@/lib/config";
 import { connectToDB } from "@/lib/database";
 import { sendVerificationEmail } from "@/lib/email";
@@ -10,14 +11,7 @@ import { User } from "@/models/User";
 import bcrypt from "bcrypt";
 import { redirect } from "next/navigation";
 
-export interface FormResponse {
-  success?: boolean,
-  error?: string,
-  validationErrors?: Record<string, string[]>,
-  prevValues?: Record<string, unknown>,
-}
-
-export const createAccount = async (_prevState: object, formData: FormData | Record<string, unknown>): Promise<FormResponse> => {
+export const createAccount = async (_prevState: object, formData: FormData | Record<string, unknown>): Promise<AccountActionResponse> => {
   // CONFIRM DATA
   const expectedData = ["firstName*", "lastName*", "email*", "password*", "confirmPassword", "terms*"];
   // returns success false if no data is provided
@@ -78,16 +72,4 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
   }
 
   return redirect("/verify?mode=verify");
-}
-
-export const deleteAccount = async () => {
-
-}
-
-export const resetAccountPassword = async () => {
-
-}
-
-export const updateAccount = async () => {
-  
 }

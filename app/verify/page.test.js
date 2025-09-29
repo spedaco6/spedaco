@@ -41,29 +41,23 @@ describe("verify page", () => {
       });
     });
   });
-  describe("mode=reset", () => {
+  describe("mode=reset-request", () => {
     test("Renders call to action when no token exists", async () => {
       actions.verifyAccount.mockResolvedValue(true);
-      const searchParams = Promise.resolve({ mode: "reset" });
+      const searchParams = Promise.resolve({ mode: "reset-request" });
       render(await VerifyPage({ searchParams }));
       await waitFor(() => {
         expect(screen.getByText("An email has been sent to reset your password")).toBeInTheDocument();
       });
     });
-    test("Renders error message when token is invalid", async () => {
-      actions.verifyAccount.mockResolvedValue(false);
-      const searchParams = Promise.resolve({ token: "invalid-token", mode: "reset" });
-      render(await VerifyPage({ searchParams }));
-      await waitFor(() => {
-        expect(screen.getByText("There was a problem with resetting your password")).toBeInTheDocument();
-      });
-    });
-    test("Renders success and redirect when token is valid", async () => {
+  });
+  describe("mode=reset-success", () => {
+    test("Displays success message after successful action", async () => {
       actions.verifyAccount.mockResolvedValue(true);
-      const searchParams = Promise.resolve({ token: "valid-token", mode:"reset" });
+      const searchParams = Promise.resolve({ mode: "reset-success" });
       render(await VerifyPage({ searchParams }));
       await waitFor(() => {
-        expect(screen.getByText("Password reset successfully!")).toBeInTheDocument();
+        expect(screen.getByText("Your password has been reset successfully!")).toBeInTheDocument();
       });
     });
   });

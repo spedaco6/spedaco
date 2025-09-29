@@ -30,17 +30,11 @@ export default async function VerifyPage({ searchParams }:
 
       { !hasToken && <p>Please verify your account. An email has been sent</p> }
     </> }
-    { mode === "reset" && <>
-      { hasToken && success && <>
-        <h1>Password reset successfully!</h1> 
-        <RedirectTimer href="/login" />
-      </> }
-
-      { hasToken && !success && <>
-        <p>There was a problem with resetting your password</p>
-      </> }
-
-      { !hasToken && <p>An email has been sent to reset your password</p> }
+    { mode === "reset-request" && <>
+      <p>An email has been sent to reset your password</p>
+    </> }
+    { mode === "reset-success" && <>
+      <p>Your password has been reset successfully!</p>
     </> }
   </main>
 }
