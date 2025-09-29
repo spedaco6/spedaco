@@ -9,10 +9,8 @@ const IS_EMAIL = [Validator.isEmail];
 
 export default function EmailForm(): React.ReactElement {
   const email: UseInputReturn = useInput("email*", "", IS_EMAIL);
-  
   const [{ success, error },formAction, isPending] = useActionState(forgotPassword, { success: false });
-  console.log(success);
-  
+
   return <>
     { !success && <form className="border-1 border-gray rounded-sm w-100 p-4" action={formAction}>
       { error && <p className="text-error">{error}</p> }
