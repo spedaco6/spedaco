@@ -34,7 +34,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     text: "Reset your password by clicking the link below", // plain‑text body
     html: `<h1>Reset your password</h1>
       <p>Reset your password by clicking the link below</p>
-      <a href="http://localhost:3000/verify?mode=reset&token=${token}">Verify Now</a>
+      <a href="http://localhost:3000/reset-password?token=${token}">Verify Now</a>
     `, // HTML body
   });
   return info;
