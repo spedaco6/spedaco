@@ -77,7 +77,7 @@ export const createAccount = async (_prevState: object, formData: FormData | Rec
     return { success: false, error: message, prevValues };
   }
 
-  return redirect("/verify");
+  return redirect("/verify?mode=verify");
 }
 
 export const deleteAccount = async () => {

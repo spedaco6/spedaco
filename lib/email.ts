@@ -20,7 +20,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     text: "Verify your account by clicking the link below", // plain‑text body
     html: `<h1>Verify your account</h1>
       <p>Verify your account now by clicking the link below</p>
-      <a href="http://localhost:3000/verify?token=${token}">Verify Now</a>
+      <a href="http://localhost:3000/verify?mode=verify&token=${token}">Verify Now</a>
     `, // HTML body
   });
   return info;
@@ -34,7 +34,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     text: "Reset your password by clicking the link below", // plain‑text body
     html: `<h1>Reset your password</h1>
       <p>Reset your password by clicking the link below</p>
-      <a href="http://localhost:3000/verify?token=${token}">Verify Now</a>
+      <a href="http://localhost:3000/verify?mode=reset&token=${token}">Verify Now</a>
     `, // HTML body
   });
   return info;

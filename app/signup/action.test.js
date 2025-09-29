@@ -108,7 +108,7 @@ describe("Account actions", () => {
     test("redirects to /verify", async () => {
       const spy = vi.spyOn(nextNav, "redirect");
       await createAccount(null, formData);
-      expect(spy).toHaveBeenCalledWith("/verify");
+      expect(spy).toHaveBeenCalledWith("/verify?mode=verify");
     });
     
     test("returns { success: false, errors: 'No account data provided' } if no formData is provided", async () => {

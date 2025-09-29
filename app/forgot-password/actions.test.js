@@ -34,6 +34,6 @@ describe("forgotPassword", () => {
   test("calls redirect once when successful", async () => {
     await forgotPassword(null, formData);
     expect(redirect).toHaveBeenCalledOnce();
-    expect(redirect).toHaveBeenCalledWith("/verify");
+    expect(redirect).toHaveBeenCalledWith("/verify?mode=reset");
   });
 });

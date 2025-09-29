@@ -10,5 +10,5 @@ export const forgotPassword = async (_prev: unknown, formData: FormData): Promis
   const { success, error } = await submitPasswordResetRequest(String(sanitized.email));
   // Redirect user
   if (!success) return { success: false, error };
-  return redirect("/verify");
+  return redirect("/verify?mode=reset");
 }

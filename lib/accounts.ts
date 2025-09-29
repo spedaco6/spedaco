@@ -1,6 +1,8 @@
 import { IUser, User } from "@/models/User";
 import { createPasswordResetToken } from "./tokens";
 import { sendPasswordResetEmail } from "./email";
+import mongoose, { MongooseError } from "mongoose";
+import { connectToDB } from "./database";
 
 export interface AccountActionResponse {
   success: boolean,
@@ -17,10 +19,12 @@ export const submitPasswordResetRequest = async (email: string): Promise<Account
   // Find requested account by email
   let user: IUser | null = null;
   try {
+    await connectToDB();
     user = await User.findOne({ email });
-    if (!user) throw new Error("Email could not be found");
+    if (!user) return { success: false, error: "Email could not be found" };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Something went wrong. Try again later";
+    if (err instanceof mongoose.MongooseError) return { success: false, error: "Something went wrong. Try again later" };
+    const message = !(err instanceof MongooseError) && err instanceof Error ? err.message : "Something went wrong. Try again later";
     return { success: false, error: message };
   }
 
