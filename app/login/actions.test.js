@@ -52,11 +52,11 @@ describe("login server action", () => {
     expect(result).toHaveProperty("prevValues");
     expect(result.prevValues).toHaveProperty("email", "email@email.com");
   });
-  test("returns authToken when successful", async () => {
-    authenticateUser.mockImplementationOnce(() => Promise.resolve({ success: true, token: "authToken", userId: "userId" }));
+  test("returns accessToken and refreshToken when successful", async () => {
+    authenticateUser.mockImplementationOnce(() => Promise.resolve({ success: true, accessToken: "accessToken", refreshToken: "refreshToken" }));
     const result = await login(null, formData);
     expect(result).toHaveProperty("success", true);
-    expect(result).toHaveProperty("token", "authToken");
-    expect(result).toHaveProperty("userId", "userId");
+    expect(result).toHaveProperty("accessToken", "accessToken");
+    expect(result).toHaveProperty("refreshToken", "refreshToken");
   });
 });

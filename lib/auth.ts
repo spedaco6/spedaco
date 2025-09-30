@@ -2,8 +2,8 @@ export interface AuthActionResponse {
   success: boolean,
   error?: string,
   prevValues?: Record<string, unknown>,
-  token?: string,
-  userId?: string,
+  accessToken?: string,
+  refreshToken?: string,
 }
 
 export const authenticateUser = async (email: string, password: string): Promise<AuthActionResponse> => {
