@@ -1,6 +1,7 @@
 import { describe, test, vi, expect } from "vitest";
 import * as accounts from "./actions";
 import * as tokens from "@/lib/tokens";
+import { verifyEmailVerificationToken } from "../../lib/tokens";
 
 describe("verifyAccount", () => {
   beforeAll(() => {
@@ -19,14 +20,14 @@ describe("verifyAccount", () => {
     const result = await accounts.verifyAccount(val);
     expect(result).toBe(false);
   });
-  test("calls verifyVerificationToken once", async () => {
-    const spy = vi.spyOn(tokens, "verifyVerificationToken");
+  test("calls verifyEmailVerificationToken once", async () => {
+    const spy = vi.spyOn(tokens, "verifyEmailVerificationToken");
     await accounts.verifyAccount("token123");
     expect(spy).toHaveBeenCalledOnce();
   });
   test("returns false when verification token is not verified", async () => {
     vi.doMock("@/lib/tokens", () => ({
-      verifyVerificationToken: vi.fn(() => false),
+      verifyEmailVerificationToken: vi.fn(() => false),
     }));
     const result = await accounts.verifyAccount("token123");
     expect(result).toBe(false);
@@ -34,7 +35,7 @@ describe("verifyAccount", () => {
   test("returns false when no user is found with matching userId", async () => {
     vi.resetModules();
     vi.doMock("@/lib/tokens", () => ({
-      verifyVerificationToken: vi.fn(() => ({ userId: "ABC123" })),
+      verifyEmailVerificationToken: vi.fn(() => ({ userId: "ABC123" })),
     }));
     vi.doMock("@/models/User", () => {
       const mockSave = vi.fn(() => Promise.resolve(true));
@@ -50,7 +51,7 @@ describe("verifyAccount", () => {
   test("returns false when verification token does not match user's verificationToken", async () => {
     vi.resetModules();
     vi.doMock("@/lib/tokens", () => ({
-      verifyVerificationToken: vi.fn(() => ({ userId: "ABC123" })),
+      verifyEmailVerificationToken: vi.fn(() => ({ userId: "ABC123" })),
     }));
     vi.doMock("@/models/User", () => {
       const mockSave = vi.fn(() => Promise.resolve(true));
@@ -81,7 +82,7 @@ describe("verifyAccount", () => {
     });
     
     vi.doMock("@/lib/tokens", () => ({
-      verifyVerificationToken: vi.fn(() => ({ userId: "ABC123" })),
+      verifyEmailVerificationToken: vi.fn(() => ({ userId: "ABC123" })),
     }));
 
     const { verifyAccount: verifyAccountSuccess } = await import("./actions");

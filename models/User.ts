@@ -9,6 +9,7 @@ export interface IUser extends Document {
   verified: boolean,
   role: UserRole, 
   terms: boolean,
+  jti: string,
   verificationToken?: string,
   passwordResetToken?: string,
 }
@@ -26,6 +27,7 @@ const schema = new Schema<IUser>({
     enum: ["user", "client", "manager", "admin", "super"] 
   },
   terms: { type: Boolean, required: true },
+  jti: { type: String, required: true },
   verificationToken: String,
   passwordResetToken: String,
 }, { timestamps: true });

@@ -1,5 +1,5 @@
 import { IUser, User } from "@/models/User";
-import { createPasswordResetToken, createVerificationToken, DecodedPasswordResetToken, verifyPasswordResetToken } from "./tokens";
+import { createPasswordResetToken, createEmailVerificationToken, DecodedToken, verifyPasswordResetToken } from "./tokens";
 import { sendPasswordResetEmail, sendVerificationEmail } from "./email";
 import { MongooseError } from "mongoose";
 import { connectToDB } from "./database";
@@ -81,7 +81,7 @@ export const createAccount = async (formData: Record<string, unknown>): Promise<
 
     // create verification token amd update user
     try {
-      const verificationToken: string = createVerificationToken(String(newUser._id));
+      const verificationToken: string = createEmailVerificationToken(newUser);
       newUser.verificationToken = verificationToken;
       await newUser.save();
     } catch (err) {
@@ -120,7 +120,7 @@ export const submitPasswordResetRequest = async (email: string): Promise<Account
   // Create and save password reset token
   let token: string | null = null;
   try {
-    token = createPasswordResetToken(String(user._id));
+    token = createPasswordResetToken(user);
     user.passwordResetToken = token;
     await user.save();
   } catch (err) {
@@ -156,7 +156,7 @@ Promise<AccountActionResponse> => {
   if (!isValid) return { success: false, validationErrors };
 
   // Verify reset token
-  let decoded: DecodedPasswordResetToken | boolean;
+  let decoded: DecodedToken | boolean;
   try {
     decoded = verifyPasswordResetToken(token);
     if (!decoded) throw new Error("Invalid token");

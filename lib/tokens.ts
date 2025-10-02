@@ -1,57 +1,60 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { IUser, User } from "@/models/User";
+import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 
-export interface DecodedVerificationToken extends JwtPayload{
-  userId: string,
-  intent: string,
-}
-export interface DecodedPasswordResetToken extends JwtPayload{
-  userId: string,
-  intent: string,
+export interface DecodedToken extends JwtPayload {
+  userId?: string,
+  intent?: "email_verification" | "password_reset" | "refresh" | "access",
+  jti?: string,
+  error?: string,
 }
 
-export const createVerificationToken = (userId: string): string => {
-  // ensure id exists
-  if (!userId || typeof userId !== "string") return "";
+export const createToken = (
+  user: IUser, 
+  intent: "email_verification" | "password_reset" | "refresh" | "access" = "access"
+): string => {
+  if (!user) return "";
   const token = jwt.sign({
-    userId, 
-    intent: "email_verification" 
-  }, process.env.TOKEN_SECRET!, { expiresIn: "15m" });  
-
-  return token;
-}
-export const verifyVerificationToken = (token?: string): DecodedVerificationToken | boolean => {
-  if (!token || typeof token !== "string") return false;
-  try {
-    const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as DecodedVerificationToken;
-    if (!decoded) return false;
-    if (decoded?.intent !== "email_verification") return false;
-    return decoded;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
-}
-
-export const createPasswordResetToken = (userId: string): string => {
-  // ensure id exists
-  if (!userId || typeof userId !== "string") return "";
-  const token = jwt.sign({
-    userId, 
-    intent: "password_reset" 
-  }, process.env.TOKEN_SECRET!, { expiresIn: "15m" });  
-
+    userId: String(user._id),
+    jti: user.jti,
+    intent,
+  }, process.env.TOKEN_SECRET!, { expiresIn: intent === "refresh" ? "7d" : "15m" });
   return token;
 }
 
-export const verifyPasswordResetToken = (token?: string): DecodedPasswordResetToken | boolean => {
-  if (!token || typeof token !== "string") return false;
+export const verifyToken = (
+  token: string, 
+  intent: "email_verification" | "password_reset" | "refresh" | "access" = "access"
+): DecodedToken => {
+  if (!token || typeof token !== "string") return { error: "No token provided" };
+  let decoded;
   try {
-    const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as DecodedPasswordResetToken;
-    if (!decoded) return false;
-    if (decoded?.intent !== "password_reset") return false;
-    return decoded;
+    decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as DecodedToken;
+    if (!decoded) return { error: "Invalid token" };
+    if (decoded.intent !== intent) return { error: "Invalid token type" };
   } catch (err) {
     console.error(err);
-    return false;
+    const message = err instanceof JsonWebTokenError ? err.message : "Invalid token";
+    return { error: message };
   }
+  return decoded;
+}
+
+export const createEmailVerificationToken = (user: IUser): string => {
+  return createToken(user, "email_verification");
+}
+
+export const createPasswordResetToken = (user: IUser): string => {
+  return createToken(user, "password_reset");
+}
+
+export const verifyEmailVerificationToken = (token: string): DecodedToken | boolean => {
+  const decoded: DecodedToken = verifyToken(token, "email_verification") as DecodedToken;
+  if (decoded?.error) return false;
+  return decoded;
+}
+
+export const verifyPasswordResetToken = (token: string): DecodedToken | boolean => {
+  const decoded: DecodedToken = verifyToken(token, "password_reset") as DecodedToken;
+  if (decoded?.error) return false;
+  return decoded;
 }

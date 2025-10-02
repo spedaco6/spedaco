@@ -1,7 +1,6 @@
 import { IUser, User } from "@/models/User";
 import { MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
-import { v4 } from "uuid";
 
 export interface AuthActionResponse {
   success: boolean,
@@ -38,8 +37,7 @@ export const authenticateUser = async (email: string, password: string): Promise
   // Check for verified status or redirect
 
   // Generate a jti for new json tokens
-  const jti: string = v4();
-  console.log(jti);
+  
   // Create refresh token
   try {
 

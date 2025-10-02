@@ -1,4 +1,4 @@
-import { DecodedVerificationToken, verifyVerificationToken } from "@/lib/tokens";
+import { DecodedToken, verifyEmailVerificationToken } from "@/lib/tokens";
 import { User } from "@/models/User";
 
 export const verifyAccount = async (token: string): Promise<boolean> => {
@@ -8,7 +8,7 @@ export const verifyAccount = async (token: string): Promise<boolean> => {
   // Decode token
   let decoded;
   try {
-    decoded = verifyVerificationToken(token) as DecodedVerificationToken;
+    decoded = verifyEmailVerificationToken(token) as DecodedToken;
   } catch (err) {
     console.error(err);
     return false;
