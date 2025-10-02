@@ -1,5 +1,6 @@
 import { IUser, User } from "@/models/User";
 import { MongooseError } from "mongoose";
+import bcrypt from "bcrypt";
 
 export interface AuthActionResponse {
   success: boolean,
@@ -12,7 +13,6 @@ export interface AuthActionResponse {
 export const authenticateUser = async (email: string, password: string): Promise<AuthActionResponse> => {
   // Ensure data is provided
   if (!email) return { success: false, error: "No email provided" };
-  console.log(password);
 
   // Find user
   let user: IUser | null = null;
@@ -27,19 +27,30 @@ export const authenticateUser = async (email: string, password: string): Promise
 
   // Validate password
   try {
+    const passwordsMatch: boolean = await bcrypt.compare(password, user.password);
+    if (!passwordsMatch) return { success: false, error: "Invalid email or password" };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: "Something went wrong. Authentication currently unavailable" };
+  }
+  
+  // Generate a jti for new json tokens
+
+  // Create refresh token
+  try {
 
   } catch (err) {
     console.error(err);
   }
-  
-  // Create token
+
+  // Create access token
   try {
 
   } catch (err) {
     console.error(err);
   }
   
-  // Save token to database
+  // Save refresh token to database
   try {
 
   } catch (err) {
