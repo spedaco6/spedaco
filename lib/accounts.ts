@@ -6,6 +6,7 @@ import { connectToDB } from "./database";
 import { AllValidators, AllValidity, Validator } from "./Validator";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "./config";
+import { v4 } from "uuid";
 
 export interface AccountActionResponse {
   success: boolean,
@@ -20,7 +21,6 @@ export const createAccount = async (formData: Record<string, unknown>): Promise<
     const expectedData = ["firstName*", "lastName*", "email*", "password*", "confirmPassword", "terms*"];
     // returns success false if no data is provided
     if (!formData) return { success: false, error: "No account data provided" };
-  
     // VALIDATE DATA  
     // calls getAllValidators once
     const validators: AllValidators = Validator.getAllValidators(formData, expectedData);
@@ -55,6 +55,9 @@ export const createAccount = async (formData: Record<string, unknown>): Promise<
       return { success: false, error: "Unable to save user at this time" }
     }
 
+    // Generate initial jti
+    const jti: string = v4();
+
     // Create new user
     const newUser = new User({
       firstName: validators.firstName.getValue(),
@@ -64,6 +67,7 @@ export const createAccount = async (formData: Record<string, unknown>): Promise<
       terms: validators.terms.getValue(),
       role: 'user',
       verified: false,
+      jti,
     });
 
     // save user

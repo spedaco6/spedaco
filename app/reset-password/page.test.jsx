@@ -53,8 +53,8 @@ describe("Reset Password Page", () => {
     await userEvent.type(confirmPassword,"P@ssword1");
     await userEvent.click(submit);
     await waitFor(() => {
-      expect(screen.getByText(/Invalid password/i)).toBeInTheDocument();
-      expect(screen.getByText(/Invalid confirm password/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Invalid password/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Invalid confirm password/i)).toBeInTheDocument();
     })
   });
 });
