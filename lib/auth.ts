@@ -1,6 +1,7 @@
 import { IUser, User } from "@/models/User";
 import { MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
+import { connectToDB } from "./database";
 
 export interface AuthActionResponse {
   success: boolean,
@@ -17,6 +18,7 @@ export const authenticateUser = async (email: string, password: string): Promise
   // Find user
   let user: IUser | null = null;
   try {
+    await connectToDB();
     user = await User.findOne({ email });
     if (!user) return { success: false, error: "Invalid email or password" };
   } catch (err) {
@@ -35,8 +37,6 @@ export const authenticateUser = async (email: string, password: string): Promise
   }
   
   // Check for verified status or redirect
-
-  // Generate a jti for new json tokens
   
   // Create refresh token
   try {

@@ -12,7 +12,7 @@ export const createToken = (
   user: IUser, 
   intent: "email_verification" | "password_reset" | "refresh" | "access" = "access"
 ): string => {
-  if (!user) return "";
+  if (!user || !(user instanceof User)) return "";
   const token = jwt.sign({
     userId: String(user._id),
     jti: user.jti,
