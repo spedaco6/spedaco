@@ -68,10 +68,9 @@ describe("verifyAccount", () => {
   });
   test("returns verified user and deletes token when successfully completed", async () => {
     const result = await verifyAccount("emailVerificationToken");
-    
     expect(result).toBe(true);
     expect(mockSave).toHaveBeenCalledOnce();
-    
+  
     const user = await mockSave.mock.results[0].value;
     expect(user.verified).toBeDefined();
     expect(user.verified).toBe(true);

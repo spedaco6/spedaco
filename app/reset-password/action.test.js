@@ -1,4 +1,4 @@
-import { beforeEach, describe, vi } from "vitest";
+import { afterAll, beforeEach, describe, vi } from "vitest";
 import { resetPassword } from "./action";
 import { completePasswordReset } from "@/lib/accounts";
 import { redirect } from "next/navigation";
@@ -15,6 +15,10 @@ describe("resetPassword", () => {
   formData.append("password", "P@ssword1");
   formData.append("confirmPassword", "P@ssword1");
   beforeEach(() => vi.clearAllMocks());
+  afterAll(() => {
+    vi.resetAllMocks();
+    vi.resetModules();
+  });
   test("returns success false with error when no data is provided", async () => {
     const result = await resetPassword();
     expect(result).toHaveProperty("success", false);

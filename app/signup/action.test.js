@@ -1,4 +1,4 @@
-import { describe, test, vi, expect } from "vitest";
+import { describe, test, vi, expect, afterAll } from "vitest";
 import { signup } from "./actions";
 import { createAccount } from "@/lib/accounts";
 import { redirect } from "next/navigation";
@@ -20,6 +20,10 @@ describe("signup server action", () => {
     formData.append("password", "P@ssword1");
     formData.append("confirmPassword", "P@ssword1");
     formData.append("terms", true);
+  });
+  afterAll(() => {
+    vi.resetAllMocks();
+    vi.resetModules();
   });
   test("returns with success false if no formData is sent", async () => {
     const result = await signup();

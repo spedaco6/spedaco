@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { login } from "./actions";
 import { authenticateUser } from "../../lib/auth";
 import * as utils from "@/lib/utils";
@@ -16,7 +16,10 @@ describe("login server action", () => {
     formData.append("email", "email@email.com");
     formData.append("password", "P@ssword1");
   });
-
+  afterAll(() => {
+    vi.resetAllMocks();
+    vi.resetModules();
+  })
   test("is defined", () => {
     expect(login).toBeDefined();
   });

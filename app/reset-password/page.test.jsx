@@ -1,10 +1,11 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test, vi } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import PasswordResetPage from "./page";
 import { resetPassword } from "./action";
 import PasswordResetForm from "../../components/Forms/PasswordResetForm";
+import { beforeEach } from "node:test";
 
 vi.mock("./action", () => ({
   resetPassword: vi.fn(),
@@ -19,6 +20,11 @@ const setup = () => {
 }
 
 describe("Reset Password Page", () => {
+  beforeEach(() => vi.clearAllMocks());
+  afterAll(() => {
+    vi.resetAllMocks();
+    vi.resetModules();
+  });
   test("Displays expired message when no token is provided", async () => {
     const searchParams = {};
     render(await PasswordResetPage({ searchParams }));
