@@ -26,7 +26,7 @@ export const verifyToken = (
   intent: "email_verification" | "password_reset" | "refresh" | "access" = "access"
 ): DecodedToken => {
   if (!token || typeof token !== "string") return { error: "No token provided" };
-  let decoded;
+  let decoded: DecodedToken;
   try {
     decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as DecodedToken;
     if (!decoded) return { error: "Invalid token" };
@@ -47,14 +47,10 @@ export const createPasswordResetToken = (user: IUser): string => {
   return createToken(user, "password_reset");
 }
 
-export const verifyEmailVerificationToken = (token: string): DecodedToken | boolean => {
-  const decoded: DecodedToken = verifyToken(token, "email_verification") as DecodedToken;
-  if (decoded?.error) return false;
-  return decoded;
+export const verifyEmailVerificationToken = (token: string): DecodedToken => {
+  return verifyToken(token, "email_verification") as DecodedToken;
 }
 
-export const verifyPasswordResetToken = (token: string): DecodedToken | boolean => {
-  const decoded: DecodedToken = verifyToken(token, "password_reset") as DecodedToken;
-  if (decoded?.error) return false;
-  return decoded;
+export const verifyPasswordResetToken = (token: string): DecodedToken => {
+  return verifyToken(token, "password_reset") as DecodedToken;
 }

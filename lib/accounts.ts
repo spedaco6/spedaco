@@ -159,7 +159,7 @@ Promise<AccountActionResponse> => {
   let decoded: DecodedToken | boolean;
   try {
     decoded = verifyPasswordResetToken(token);
-    if (!decoded) throw new Error("Invalid token");
+    if (decoded?.error) throw new Error(decoded.error);
   } catch (err) {
     console.error(err);
     const message = err instanceof Error ? err.message : "Invalid token";

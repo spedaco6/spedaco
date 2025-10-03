@@ -6,7 +6,7 @@ export const verifyAccount = async (token: string): Promise<boolean> => {
   if (!token || typeof token !== "string") return false;
   
   // Decode token
-  let decoded;
+  let decoded: DecodedToken;
   try {
     decoded = verifyEmailVerificationToken(token) as DecodedToken;
   } catch (err) {
@@ -15,7 +15,7 @@ export const verifyAccount = async (token: string): Promise<boolean> => {
   }
 
   // If no token, retur false
-  if (!decoded) return false;
+  if (decoded?.error) return false;
   const user = await User.findById(decoded?.userId);
   if (!user) return false;
   if (user?.verificationToken !== token) return false;
