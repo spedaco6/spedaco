@@ -30,6 +30,7 @@ export const verifyToken = (
   try {
     decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as DecodedToken;
     if (!decoded) return { error: "Invalid token" };
+    if (decoded instanceof Error) return { error: decoded.message };
     if (decoded.intent !== intent) return { error: "Invalid token type" };
   } catch (err) {
     console.error(err);
@@ -46,11 +47,22 @@ export const createEmailVerificationToken = (user: IUser): string => {
 export const createPasswordResetToken = (user: IUser): string => {
   return createToken(user, "password_reset");
 }
+export const createAccessToken = (user: IUser): string => {
+  return createToken(user, "access");
+}
+export const createRefreshToken = (user: IUser): string => {
+  return createToken(user, "refresh");
+}
 
 export const verifyEmailVerificationToken = (token: string): DecodedToken => {
   return verifyToken(token, "email_verification") as DecodedToken;
 }
-
 export const verifyPasswordResetToken = (token: string): DecodedToken => {
   return verifyToken(token, "password_reset") as DecodedToken;
+}
+export const verifyAccessToken = (token: string): DecodedToken => {
+  return verifyToken(token, "access") as DecodedToken;
+}
+export const verifyRefreshToken = (token: string): DecodedToken => {
+  return verifyToken(token, "refresh") as DecodedToken;
 }
