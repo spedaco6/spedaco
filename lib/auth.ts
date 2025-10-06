@@ -3,6 +3,7 @@ import { MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
 import { connectToDB } from "./database";
 import { createAccessToken, createRefreshToken } from "./tokens";
+import { UserSession } from "@/models/UserSession";
 
 export interface AuthActionResponse {
   success: boolean,
@@ -39,14 +40,24 @@ export const authenticateUser = async (email: string, password: string): Promise
   
   // Check for verified status or redirect
   
-  // Create refresh token
-  const refreshToken: string = createRefreshToken(user);
-
-  // Create access token
+  
+  // Create refresh and access tokens
   const accessToken: string = createAccessToken(user);
+  const refreshToken: string = createRefreshToken(user);
   
   // Save refresh token to database
-  
+  const userSession = new UserSession({
+    refreshToken,
+    userId: String(user._id),
+  });
+  try {
+    await userSession.save();
+  } catch (err) {
+    console.error(err);
+    const message = !(err instanceof MongooseError) && err instanceof Error ? err.message : "Something went wrong. Could not authenticate user at this time";
+    return { success: false, error: message };
+  }
+
   // Return result
   return { success: true, refreshToken, accessToken };
 }
