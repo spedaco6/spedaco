@@ -1,9 +1,11 @@
 import { IUser, User } from "@/models/User";
 import jwt, { JsonWebTokenError, JwtPayload } from "jsonwebtoken";
 
+export type TokenIntent = "email_verification" | "password_reset" | "refresh" | "access";
+
 export interface DecodedToken extends JwtPayload {
   userId?: string,
-  intent?: "email_verification" | "password_reset" | "refresh" | "access",
+  intent?: TokenIntent,
   jti?: string,
   error?: string,
 }
@@ -49,7 +51,6 @@ export const verifyToken = (
 export const createEmailVerificationToken = (user: IUser): string => {
   return createToken(user, "email_verification");
 }
-
 export const createPasswordResetToken = (user: IUser): string => {
   return createToken(user, "password_reset");
 }
