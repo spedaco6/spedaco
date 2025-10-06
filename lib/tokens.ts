@@ -13,11 +13,17 @@ export const createToken = (
   intent: "email_verification" | "password_reset" | "refresh" | "access" = "access"
 ): string => {
   if (!user || !(user instanceof User)) return "";
-  const token = jwt.sign({
-    userId: String(user._id),
-    jti: user.jti,
-    intent,
-  }, process.env.TOKEN_SECRET!, { expiresIn: intent === "refresh" ? "7d" : "15m" });
+  let token: string;
+  try {
+    token = jwt.sign({
+      userId: String(user._id),
+      jti: user.jti,
+      intent,
+    }, process.env.TOKEN_SECRET!, { expiresIn: intent === "refresh" ? "7d" : "15m" });
+  } catch (err) {
+    console.error(err);
+    return "";
+  }
   return token;
 }
 

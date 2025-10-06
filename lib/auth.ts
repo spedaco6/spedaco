@@ -2,6 +2,7 @@ import { IUser, User } from "@/models/User";
 import { MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
 import { connectToDB } from "./database";
+import { createAccessToken, createRefreshToken } from "./tokens";
 
 export interface AuthActionResponse {
   success: boolean,
@@ -39,26 +40,13 @@ export const authenticateUser = async (email: string, password: string): Promise
   // Check for verified status or redirect
   
   // Create refresh token
-  try {
-
-  } catch (err) {
-    console.error(err);
-  }
+  const refreshToken: string = createRefreshToken(user);
 
   // Create access token
-  try {
-
-  } catch (err) {
-    console.error(err);
-  }
+  const accessToken: string = createAccessToken(user);
   
   // Save refresh token to database
-  try {
-
-  } catch (err) {
-    console.error(err);
-  }
-
+  
   // Return result
-  return { success: true };
+  return { success: true, refreshToken, accessToken };
 }
