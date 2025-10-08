@@ -1,11 +1,13 @@
 import { describe, test, vi, expect } from "vitest";
 import * as accounts from "./actions";
 import { User } from "@/models/User";
-import { verifyEmailVerificationToken } from "../../lib/tokens";
+import { decode } from "@/lib/sessions";
 import { verifyAccount } from "./actions";
 
-vi.mock("@/lib/tokens", () => ({
-  verifyEmailVerificationToken: vi.fn(() => ({ 
+vi.mock("server-only", () => ({}));
+
+vi.mock("@/lib/sessions", () => ({
+  decode: vi.fn(() => ({ 
     userId: "userId",
     jti: "jti",
     intent: "email_verification",
@@ -42,12 +44,12 @@ describe("verifyAccount", () => {
     const result = await accounts.verifyAccount(val);
     expect(result).toBe(false);
   });
-  test("calls verifyEmailVerificationToken once", async () => {
+  test("calls decode once", async () => {
     await accounts.verifyAccount("token123");
-    expect(verifyEmailVerificationToken).toHaveBeenCalledOnce();
+    expect(decode).toHaveBeenCalledOnce();
   });
   test("returns false when verification token is not verified", async () => {
-    verifyEmailVerificationToken.mockImplementationOnce(() => ({ error: "Error message" }));
+    decode.mockImplementationOnce(() => ({ error: "Error message" }));
     const result = await accounts.verifyAccount("token123");
     expect(result).toBe(false);
   });
@@ -62,7 +64,7 @@ describe("verifyAccount", () => {
     expect(result).toBe(false);
   });
   test("returns false when verification token does not match user's verificationToken", async () => {
-    verifyEmailVerificationToken.mockImplementationOnce(() => ({ error: "Token mismatch"}))
+    decode.mockImplementationOnce(() => ({ error: "Token mismatch"}))
     const result = await verifyAccount("mismatch");
     expect(result).toBe(false);
   });

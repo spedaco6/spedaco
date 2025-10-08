@@ -1,5 +1,4 @@
 import { IUser, User } from "@/models/User";
-import { createPasswordResetToken, createEmailVerificationToken, DecodedToken, verifyPasswordResetToken } from "./tokens";
 import { sendPasswordResetEmail, sendVerificationEmail } from "./email";
 import { MongooseError } from "mongoose";
 import { connectToDB } from "./database";
@@ -7,6 +6,7 @@ import { AllValidators, AllValidity, Validator } from "./Validator";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "./config";
 import { v4 } from "uuid";
+import { decode, DecodedSession, encode } from "./sessions";
 
 export interface AccountActionResponse {
   success: boolean,
@@ -81,7 +81,7 @@ export const createAccount = async (formData: Record<string, unknown>): Promise<
 
     // create verification token amd update user
     try {
-      const verificationToken: string = createEmailVerificationToken(newUser);
+      const verificationToken: string = await encode(newUser, "email_verification");
       newUser.verificationToken = verificationToken;
       await newUser.save();
     } catch (err) {
@@ -118,9 +118,9 @@ export const submitPasswordResetRequest = async (email: string): Promise<Account
   }
 
   // Create and save password reset token
-  let token: string | null = null;
+  let token: string;
   try {
-    token = createPasswordResetToken(user);
+    token = await encode(user, "password_reset");
     user.passwordResetToken = token;
     await user.save();
   } catch (err) {
@@ -156,9 +156,9 @@ Promise<AccountActionResponse> => {
   if (!isValid) return { success: false, validationErrors };
 
   // Verify reset token
-  let decoded: DecodedToken | boolean;
+  let decoded: DecodedSession;
   try {
-    decoded = verifyPasswordResetToken(token);
+    decoded = await decode(token, "password_reset");
     if (decoded?.error) throw new Error(decoded.error);
   } catch (err) {
     console.error(err);
@@ -170,7 +170,7 @@ Promise<AccountActionResponse> => {
   let user: IUser | null;
   try {
     await connectToDB();
-    const userId = typeof decoded === "boolean" ? "" : decoded?.userId;
+    const userId = decoded?.userId;
     user = await User.findById(userId);
     if (!user) throw new Error("Invalid user");
     if (user.passwordResetToken !== token) throw new Error("Token mismatch");

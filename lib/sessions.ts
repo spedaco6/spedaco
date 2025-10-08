@@ -27,36 +27,36 @@ export const encode = async (
     intent,
   };
 
-  const token: string = await new SignJWT(payload)
-    .setJti(user.jti)
-    .setExpirationTime(intent === "refresh" ? "7d" : "15m")
-    .setProtectedHeader({ alg })
-    .sign(encodedKey)
-    .catch(err => {
-      console.error(err);
-      return "";
-    });
+  let token: string;
+  try {
+    token = await new SignJWT(payload)
+      .setJti(user.jti)
+      .setExpirationTime(intent === "refresh" ? "7d" : "15m")
+      .setProtectedHeader({ alg })
+      .sign(encodedKey)
 
+  } catch (err) {
+    console.error(err);
+    return "";
+  }
   return token;
 }
 
 export const decode = async (
   token: string, 
-  tokenIntent: TokenIntent = "access"
+  tokenIntent: TokenIntent = "access",
 ): Promise<DecodedSession> => {
   if (!token || typeof token !== "string") return { error: "No token provided" };
   try {
     const { payload } = await jwtVerify(token, encodedKey, { algorithms: [alg] });
     if (!payload || typeof payload !== "object") return { error: "Invalid token" };
-    const { userId, role, intent } = payload as Partial<DecodedSession>;
+    const { userId, role, intent, jti } = payload as Partial<DecodedSession>;
     if (intent !== tokenIntent) return { error: "Invalid token type" };
-    return {
-      userId,
-      role,
-    };
+    const decodedToken = { userId, role, jti };
+    return decodedToken;
   } catch (err) {
     console.error(err);
-    const message = err instanceof JOSEError ? err.message : "Invalid token";
+    const message = err instanceof JOSEError ? err.message : "Invalid token error";
     return { error: message };
   }
 }
