@@ -1,6 +1,6 @@
 "use server";
 import { AuthActionResponse, authenticateUser } from "@/lib/auth";
-import { createSession } from "@/lib/cookies";
+import { createSession } from "@/lib/sessions";
 import { sanitize } from "@/lib/utils";
 import { redirect } from "next/navigation";
 

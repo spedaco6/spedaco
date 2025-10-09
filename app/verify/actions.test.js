@@ -1,12 +1,12 @@
 import { describe, test, vi, expect } from "vitest";
 import * as accounts from "./actions";
 import { User } from "@/models/User";
-import { decrypt } from "@/lib/sessions";
+import { decrypt } from "@/lib/tokens";
 import { verifyAccount } from "./actions";
 
 vi.mock("server-only", () => ({}));
 
-vi.mock("@/lib/sessions", () => ({
+vi.mock("@/lib/tokens", () => ({
   decrypt: vi.fn(() => ({ 
     userId: "userId",
     jti: "jti",

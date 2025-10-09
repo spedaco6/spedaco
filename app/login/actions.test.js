@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { login } from "./actions";
-import { createSession } from "@/lib/cookies";
+import { createSession } from "@/lib/sessions";
 import { authenticateUser } from "../../lib/auth";
 import * as utils from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(() => {}),
 }));
 
-vi.mock("@/lib/cookies", () => ({
+vi.mock("@/lib/sessions", () => ({
   createSession: vi.fn(() => Promise.resolve()),
 }));
 

@@ -1,12 +1,12 @@
 "use server";
-import { decrypt, DecodedSession } from "@/lib/sessions";
+import { decrypt, DecodedToken } from "@/lib/tokens";
 import { IUser, User } from "@/models/User";
 
 export const verifyAccount = async (token: string): Promise<boolean> => {
   // Ensure token is defined and type string
   if (!token || typeof token !== "string") return false;
   // decrypt token
-  let decoded: DecodedSession;
+  let decoded: DecodedToken;
   try {
     decoded = await decrypt(token, "email_verification");
   } catch (err) {

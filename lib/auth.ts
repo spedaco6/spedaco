@@ -2,11 +2,10 @@ import { IUser, User } from "@/models/User";
 import { MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
 import { connectToDB } from "./database";
-import { UserSession } from "@/models/UserSession";
-import { encrypt } from "./sessions";
+// import { UserSession } from "@/models/UserSession";
+import { encrypt } from "./tokens";
 
 export interface AuthActionResponse {
-  //success: boolean,
   error?: string,
   prevValues?: Record<string, unknown>,
   accessToken?: string,
@@ -45,6 +44,7 @@ export const authenticateUser = async (email: string, password: string): Promise
   const accessToken: string = await encrypt(user);
   const refreshToken: string = await encrypt(user, "refresh");
 
+  /* Not needed at this time   
   // Save refresh token to database
   const userSession = new UserSession({
     refreshToken,
@@ -56,7 +56,8 @@ export const authenticateUser = async (email: string, password: string): Promise
     console.error(err);
     const message = !(err instanceof MongooseError) && err instanceof Error ? err.message : "Something went wrong. Could not authenticate user at this time";
     return { error: message };
-  }
+  } 
+  */
 
   // Return result
   return { refreshToken, accessToken };

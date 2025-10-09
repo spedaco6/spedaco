@@ -10,7 +10,7 @@ const IS_EMAIL = [Validator.isEmail];
 export default function LoginForm({ className="" }: React.PropsWithChildren<{ className?: string }>): React.ReactElement {
   const email: UseInputReturn = useInput("email*", "", IS_EMAIL, { message: "Email is required" });
   const password: UseInputReturn = useInput("password*", "", [], { message: "Password is required"});
-  const [ authState, loginAction, isPending ] = useActionState(login, { success: false });
+  const [ authState, loginAction, isPending ] = useActionState(login, {});
   
   /* useEffect(() => {
     if (authState.accessToken) {
