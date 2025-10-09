@@ -6,7 +6,7 @@ import { AllValidators, AllValidity, Validator } from "./Validator";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "./config";
 import { v4 } from "uuid";
-import { decode, DecodedSession, encode } from "./sessions";
+import { decrypt, DecodedSession, encrypt } from "./sessions";
 
 export interface AccountActionResponse {
   success: boolean,
@@ -81,7 +81,7 @@ export const createAccount = async (formData: Record<string, unknown>): Promise<
 
     // create verification token amd update user
     try {
-      const verificationToken: string = await encode(newUser, "email_verification");
+      const verificationToken: string = await encrypt(newUser, "email_verification");
       newUser.verificationToken = verificationToken;
       await newUser.save();
     } catch (err) {
@@ -120,7 +120,7 @@ export const submitPasswordResetRequest = async (email: string): Promise<Account
   // Create and save password reset token
   let token: string;
   try {
-    token = await encode(user, "password_reset");
+    token = await encrypt(user, "password_reset");
     user.passwordResetToken = token;
     await user.save();
   } catch (err) {
@@ -158,7 +158,7 @@ Promise<AccountActionResponse> => {
   // Verify reset token
   let decoded: DecodedSession;
   try {
-    decoded = await decode(token, "password_reset");
+    decoded = await decrypt(token, "password_reset");
     if (decoded?.error) throw new Error(decoded.error);
   } catch (err) {
     console.error(err);

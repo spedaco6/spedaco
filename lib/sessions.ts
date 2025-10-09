@@ -16,7 +16,8 @@ const secretKey = process.env.TOKEN_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 const alg = "H256";
 
-export const encode = async (
+
+export const encrypt = async (
   user: IUser, 
   intent: TokenIntent = "access"
 ): Promise<string> => {
@@ -42,7 +43,7 @@ export const encode = async (
   return token;
 }
 
-export const decode = async (
+export const decrypt = async (
   token: string, 
   tokenIntent: TokenIntent = "access",
 ): Promise<DecodedSession> => {

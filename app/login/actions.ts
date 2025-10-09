@@ -1,5 +1,6 @@
 "use server";
 import { AuthActionResponse, authenticateUser } from "@/lib/auth";
+import { createSession } from "@/lib/cookies";
 import { sanitize } from "@/lib/utils";
 
 export const login = async (prevValues: AuthActionResponse, formData: FormData): Promise<AuthActionResponse> => {
@@ -12,14 +13,20 @@ export const login = async (prevValues: AuthActionResponse, formData: FormData):
   // Complete authentication action
   let result: AuthActionResponse;
   try {
+    console.log("TO HERE");
     result = await authenticateUser(String(sanitized.email), String(sanitized.password));
-    if (!result.success) return { ...result, prevValues: { email: sanitized.email }};
+    if (!result.success || !result.refreshToken) return { ...result, prevValues: { email: sanitized.email }};
   } catch (err) {
     console.error(err);
     const message = err instanceof Error ? err.message : "Something went wrong. Could not authenticate user";
     return { success: false, error: message, prevValues: { email: sanitized.email } };
   }
 
+  // Set cookie
+  const { refreshToken } = result;
+  await createSession(refreshToken);
+
+
   // return result
-  return { success: true, accessToken: result.accessToken, refreshToken: result.refreshToken };
+  return { success: true, accessToken: result.accessToken };
 }

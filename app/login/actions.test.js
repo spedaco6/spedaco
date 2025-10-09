@@ -1,11 +1,17 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { login } from "./actions";
+import { createSession } from "@/lib/cookies";
 import { authenticateUser } from "../../lib/auth";
 import * as utils from "@/lib/utils";
 
 vi.mock("@/lib/auth", () => ({
-  authenticateUser: vi.fn(() => Promise.resolve({ success: true })),
+  authenticateUser: vi.fn(() => Promise.resolve({ success: true, refreshToken: "refreshToken", accessToken: "accessToken" })),
 }));
+
+vi.mock("@/lib/cookies", () => ({
+  createSession: vi.fn(() => Promise.resolve()),
+}));
+
 vi.spyOn(console, "error").mockImplementation(() => {});
 vi.spyOn(utils, "sanitize");
 
@@ -55,11 +61,16 @@ describe("login server action", () => {
     expect(result).toHaveProperty("prevValues");
     expect(result.prevValues).toHaveProperty("email", "email@email.com");
   });
-  test("returns accessToken and refreshToken when successful", async () => {
+  test("calls createSession with refreshToken", async () => {
+    const result = await login(null, formData);
+    const call = createSession.mock.calls[0][0];
+    expect(createSession).toHaveBeenCalledOnce();
+    expect(call).toBe("refreshToken");
+  });
+  test("returns accessToken when successful", async () => {
     authenticateUser.mockImplementationOnce(() => Promise.resolve({ success: true, accessToken: "accessToken", refreshToken: "refreshToken" }));
     const result = await login(null, formData);
     expect(result).toHaveProperty("success", true);
     expect(result).toHaveProperty("accessToken", "accessToken");
-    expect(result).toHaveProperty("refreshToken", "refreshToken");
   });
 });

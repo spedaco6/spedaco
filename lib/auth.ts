@@ -3,7 +3,8 @@ import { MongooseError } from "mongoose";
 import bcrypt from "bcrypt";
 import { connectToDB } from "./database";
 import { UserSession } from "@/models/UserSession";
-import { encode } from "./sessions";
+import { encrypt } from "./sessions";
+import { access } from "fs";
 
 export interface AuthActionResponse {
   success: boolean,
@@ -42,9 +43,9 @@ export const authenticateUser = async (email: string, password: string): Promise
   
   
   // Create refresh and access tokens
-  const accessToken: string = await encode(user);
-  const refreshToken: string = await encode(user, "refresh");
-  
+  const accessToken: string = await encrypt(user);
+  const refreshToken: string = await encrypt(user, "refresh");
+  console.log(refreshToken);
   // Save refresh token to database
   const userSession = new UserSession({
     refreshToken,
