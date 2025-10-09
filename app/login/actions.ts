@@ -2,10 +2,11 @@
 import { AuthActionResponse, authenticateUser } from "@/lib/auth";
 import { createSession } from "@/lib/cookies";
 import { sanitize } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 export const login = async (prevValues: AuthActionResponse, formData: FormData): Promise<AuthActionResponse> => {
   // Ensure formData exists
-  if (!formData) return { success: false, error: "No data was provided" };
+  if (!formData) return { error: "No data was provided" };
   
   // Sanitize data
   const sanitized = sanitize(formData);
@@ -13,20 +14,18 @@ export const login = async (prevValues: AuthActionResponse, formData: FormData):
   // Complete authentication action
   let result: AuthActionResponse;
   try {
-    console.log("TO HERE");
     result = await authenticateUser(String(sanitized.email), String(sanitized.password));
-    if (!result.success || !result.refreshToken) return { ...result, prevValues: { email: sanitized.email }};
+    if (result.error || !result.refreshToken) return { ...result, prevValues: { email: sanitized.email }};
   } catch (err) {
     console.error(err);
     const message = err instanceof Error ? err.message : "Something went wrong. Could not authenticate user";
-    return { success: false, error: message, prevValues: { email: sanitized.email } };
+    return { error: message, prevValues: { email: sanitized.email } };
   }
 
   // Set cookie
   const { refreshToken } = result;
   await createSession(refreshToken);
 
-
-  // return result
-  return { success: true, accessToken: result.accessToken };
+  // Redirect to user dashboard
+  return redirect("/auth/dashboard");
 }

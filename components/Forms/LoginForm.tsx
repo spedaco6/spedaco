@@ -12,18 +12,11 @@ export default function LoginForm({ className="" }: React.PropsWithChildren<{ cl
   const password: UseInputReturn = useInput("password*", "", [], { message: "Password is required"});
   const [ authState, loginAction, isPending ] = useActionState(login, { success: false });
   
-  useEffect(() => {
-    if (authState.refreshToken) {
-      // Set session cookie here
-      console.log("refresh", authState.refreshToken);
-    }
-  }, [authState.refreshToken]);
-
-  useEffect(() => {
+  /* useEffect(() => {
     if (authState.accessToken) {
       localStorage.setItem("accessToken", authState.accessToken);
     }
-  }, [authState.accessToken]);
+  }, [authState.accessToken]); */
 
   return <form 
     className={`sm:w-[25rem] w-4/5 m-2 border-2 p-4 rounded-xl ${className}`} 

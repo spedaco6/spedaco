@@ -3,9 +3,14 @@ import { login } from "./actions";
 import { createSession } from "@/lib/cookies";
 import { authenticateUser } from "../../lib/auth";
 import * as utils from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 vi.mock("@/lib/auth", () => ({
-  authenticateUser: vi.fn(() => Promise.resolve({ success: true, refreshToken: "refreshToken", accessToken: "accessToken" })),
+  authenticateUser: vi.fn(() => Promise.resolve({ refreshToken: "refreshToken", accessToken: "accessToken" })),
+}));
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(() => {}),
 }));
 
 vi.mock("@/lib/cookies", () => ({
@@ -31,7 +36,6 @@ describe("login server action", () => {
   });
   test("returns unsuccessful if no formData is provided", async () => {
     const result = await login();
-    expect(result).toHaveProperty("success", false);
     expect(result).toHaveProperty("error");
   });
   test("calls sanitize once", async () => {
@@ -46,9 +50,8 @@ describe("login server action", () => {
     expect(password).toBe("P@ssword1");
   });
   test("returns unsuccessful when authenticateUser fails", async () => {
-    authenticateUser.mockImplementationOnce(() => Promise.resolve({ success: false, error: "Generic error" }));
+    authenticateUser.mockImplementationOnce(() => Promise.resolve({ error: "Generic error" }));
     const result = await login(null, formData);
-    expect(result).toHaveProperty("success", false);
     expect(result).toHaveProperty("error", "Generic error");
     expect(result).toHaveProperty("prevValues");
     expect(result.prevValues).toHaveProperty("email", "email@email.com");
@@ -56,7 +59,6 @@ describe("login server action", () => {
   test("returns unsuccessful when authenticateUser throws error", async () => {
     authenticateUser.mockImplementationOnce(() => Promise.reject(new Error("unexpected-error")));
     const result = await login(null, formData);
-    expect(result).toHaveProperty("success", false);
     expect(result).toHaveProperty("error", "unexpected-error");
     expect(result).toHaveProperty("prevValues");
     expect(result.prevValues).toHaveProperty("email", "email@email.com");
@@ -67,10 +69,9 @@ describe("login server action", () => {
     expect(createSession).toHaveBeenCalledOnce();
     expect(call).toBe("refreshToken");
   });
-  test("returns accessToken when successful", async () => {
-    authenticateUser.mockImplementationOnce(() => Promise.resolve({ success: true, accessToken: "accessToken", refreshToken: "refreshToken" }));
-    const result = await login(null, formData);
-    expect(result).toHaveProperty("success", true);
-    expect(result).toHaveProperty("accessToken", "accessToken");
+  test("calls redirect with /auth/dashboard", async () => {
+    authenticateUser.mockImplementationOnce(() => Promise.resolve({ accessToken: "accessToken", refreshToken: "refreshToken" }));
+    await login(null, formData);
+    expect(redirect).toHaveBeenCalledExactlyOnceWith("/auth/dashboard");
   });
 });

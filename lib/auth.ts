@@ -4,10 +4,9 @@ import bcrypt from "bcrypt";
 import { connectToDB } from "./database";
 import { UserSession } from "@/models/UserSession";
 import { encrypt } from "./sessions";
-import { access } from "fs";
 
 export interface AuthActionResponse {
-  success: boolean,
+  //success: boolean,
   error?: string,
   prevValues?: Record<string, unknown>,
   accessToken?: string,
@@ -16,27 +15,27 @@ export interface AuthActionResponse {
 
 export const authenticateUser = async (email: string, password: string): Promise<AuthActionResponse> => {
   // Ensure data is provided
-  if (!email) return { success: false, error: "No email provided" };
+  if (!email) return { error: "No email provided" };
 
   // Find user
   let user: IUser | null = null;
   try {
     await connectToDB();
     user = await User.findOne({ email });
-    if (!user) return { success: false, error: "Invalid email or password" };
+    if (!user) return { error: "Invalid email or password" };
   } catch (err) {
     console.error(err);
     const message = !(err instanceof MongooseError) && err instanceof Error ? err.message : "Something went wrong. Could not create your account at this time";
-    return { success: false, error: message };
+    return { error: message };
   }
 
   // Validate password
   try {
     const passwordsMatch: boolean = await bcrypt.compare(password, user.password);
-    if (!passwordsMatch) return { success: false, error: "Invalid email or password" };
+    if (!passwordsMatch) return { error: "Invalid email or password" };
   } catch (err) {
     console.error(err);
-    return { success: false, error: "Something went wrong. Authentication currently unavailable" };
+    return { error: "Something went wrong. Authentication currently unavailable" };
   }
   
   // Check for verified status or redirect
@@ -45,7 +44,7 @@ export const authenticateUser = async (email: string, password: string): Promise
   // Create refresh and access tokens
   const accessToken: string = await encrypt(user);
   const refreshToken: string = await encrypt(user, "refresh");
-  console.log(refreshToken);
+
   // Save refresh token to database
   const userSession = new UserSession({
     refreshToken,
@@ -56,9 +55,9 @@ export const authenticateUser = async (email: string, password: string): Promise
   } catch (err) {
     console.error(err);
     const message = !(err instanceof MongooseError) && err instanceof Error ? err.message : "Something went wrong. Could not authenticate user at this time";
-    return { success: false, error: message };
+    return { error: message };
   }
 
   // Return result
-  return { success: true, refreshToken, accessToken };
+  return { refreshToken, accessToken };
 }

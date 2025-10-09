@@ -2,6 +2,7 @@ import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { IUser, User, UserRole } from "@/models/User";
 import { JOSEError } from "jose/errors";
+import { createSecretKey } from "crypto";
 
 export type TokenIntent = "email_verification" | "password_reset" | "refresh" | "access";
 export interface DecodedSession {
@@ -11,11 +12,9 @@ export interface DecodedSession {
   jti?: string,
   error?: string,
 }
-
-const secretKey = process.env.TOKEN_SECRET;
-const encodedKey = new TextEncoder().encode(secretKey);
-const alg = "H256";
-
+const secretKey = process.env.TOKEN_SECRET!;
+const encodedKey = createSecretKey(Buffer.from(secretKey, "utf-8"));
+const alg = "HS256";
 
 export const encrypt = async (
   user: IUser, 
