@@ -6,7 +6,7 @@ import { AllValidators, AllValidity, Validator } from "./Validator";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "./config";
 import { v4 } from "uuid";
-import { decrypt, DecodedSession, encrypt } from "./tokens";
+import { decrypt, DecodedToken, encrypt } from "./tokens";
 
 export interface AccountActionResponse {
   success: boolean,
@@ -156,7 +156,7 @@ Promise<AccountActionResponse> => {
   if (!isValid) return { success: false, validationErrors };
 
   // Verify reset token
-  let decoded: DecodedSession;
+  let decoded: DecodedToken;
   try {
     decoded = await decrypt(token, "password_reset");
     if (decoded?.error) throw new Error(decoded.error);

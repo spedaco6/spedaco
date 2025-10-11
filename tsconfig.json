@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "lib/validation.test.js", "lib/accounts.test.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "lib/validation.test.js", "lib/accounts.test.js", "lib/sessions.test.js"],
   "exclude": ["node_modules"]
 }

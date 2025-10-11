@@ -19,7 +19,6 @@ export async function updateSession(): Promise<void> {
   const session = cookieStore.get("session")?.value || "";
   const payload: DecodedToken = await decrypt(session);
 
-  console.log("TO HERE", session);
   if (session && payload.error === undefined) {
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     cookieStore.set('session', session, {
