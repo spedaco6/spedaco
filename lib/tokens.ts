@@ -1,26 +1,24 @@
 import "server-only";
 import { SignJWT, jwtVerify } from "jose";
-import { IUser, User, UserRole } from "@/models/User";
 import { JOSEError } from "jose/errors";
-import { createSecretKey } from "crypto";
 
 export type TokenIntent = "email_verification" | "password_reset" | "refresh" | "access";
 export interface DecodedToken {
   userId?: string,
   intent?: TokenIntent,
-  role?: UserRole,
+  role?: "user" | "client" | "manager" | "admin" | "super",
   jti?: string,
   error?: string,
 }
 const secretKey = process.env.TOKEN_SECRET!;
-const encodedKey = createSecretKey(Buffer.from(secretKey, "utf-8"));
+const encodedKey = new TextEncoder().encode(secretKey);
 const alg = "HS256";
 
 export const encrypt = async (
-  user: IUser, 
+  user: { _id: string, jti: string, role: "user" | "client" | "manager" | "admin" | "super" }, 
   intent: TokenIntent = "access"
 ): Promise<string> => {
-  if (!user || !(user instanceof User)) return "";
+  if (!user || !user._id || !user.jti || !user.role) return "";
   const payload = {
     userId: String(user._id),
     role: user.role,

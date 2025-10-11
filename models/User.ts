@@ -2,6 +2,7 @@ import { Schema, Document, model, models } from "mongoose";
 
 export type UserRole = "user" | "client" | "manager" | "admin" | "super"; 
 export interface IUser extends Document {
+  _id: string,
   firstName: string,
   lastName: string,
   email: string,
