@@ -25,7 +25,6 @@ export const login = async (prevValues: AuthActionResponse, formData: FormData):
   // Set cookie
   const { refreshToken } = result;
   await createSession(refreshToken);
-
   // Redirect to user dashboard
   return redirect("/auth/dashboard");
 }

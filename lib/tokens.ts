@@ -1,8 +1,9 @@
 import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { JOSEError } from "jose/errors";
+// import { createSecretKey } from "crypto";
 
-export type TokenIntent = "email_verification" | "password_reset" | "refresh" | "access";
+export type TokenIntent = "email_verification" | "password_reset" | "refresh" | "session" | "access";
 export interface DecodedToken {
   userId?: string,
   intent?: TokenIntent,
@@ -11,6 +12,7 @@ export interface DecodedToken {
   error?: string,
 }
 const secretKey = process.env.TOKEN_SECRET!;
+// const encodedKey = createSecretKey(Buffer.from(secretKey, "utf-8"));
 const encodedKey = new TextEncoder().encode(secretKey);
 const alg = "HS256";
 
@@ -24,7 +26,6 @@ export const encrypt = async (
     role: user.role,
     intent,
   };
-
   let token: string;
   try {
     token = await new SignJWT(payload)

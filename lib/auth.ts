@@ -42,7 +42,7 @@ export const authenticateUser = async (email: string, password: string): Promise
   
   // Create refresh and access tokens
   const accessToken: string = await encrypt(user);
-  const refreshToken: string = await encrypt(user, "refresh");
+  const refreshToken: string = await encrypt(user, "session");
 
   /* Not needed at this time   
   // Save refresh token to database
