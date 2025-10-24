@@ -7,7 +7,7 @@ export async function createSession(token: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set('session', token, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: 'lax',
     path: '/', 
@@ -23,7 +23,7 @@ export async function updateSession(): Promise<void> {
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     cookieStore.set('session', session, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       expires: expires,
       sameSite: 'lax',
       path: '/',
