@@ -3,7 +3,7 @@ import React, { useActionState } from "react";
 import Input from "../Input";
 import useInput, { UseInputReturn } from "@/hooks/useInput";
 import { Validator } from "@/lib/Validator";
-import { forgotPassword } from "@/app/forgot-password/actions";
+import { forgotPassword } from "@/app/(root)/forgot-password/actions";
 
 const IS_EMAIL = [Validator.isEmail];
 

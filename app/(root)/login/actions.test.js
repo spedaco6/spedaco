@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { login } from "./actions";
 import { createSession } from "@/lib/sessions";
-import { authenticateUser } from "../../lib/auth";
+import { authenticateUser } from "@/lib/auth";
 import * as utils from "@/lib/utils";
 import { redirect } from "next/navigation";
 

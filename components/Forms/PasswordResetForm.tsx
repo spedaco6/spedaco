@@ -4,7 +4,7 @@ import useInput, { UseInputReturn } from "@/hooks/useInput";
 import { Validator } from "@/lib/Validator";
 import React, { useActionState, useEffect, useMemo } from "react";
 import Input from "../Input";
-import { resetPassword } from "@/app/reset-password/action";
+import { resetPassword } from "@/app/(root)/reset-password/action";
 
 const IS_PASSWORD = [Validator.isPassword()];
 

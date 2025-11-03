@@ -3,7 +3,7 @@ import React, { useActionState, useEffect, useMemo } from "react";
 import Input from "../Input";
 import useInput, { UseInputReturn } from "@/hooks/useInput";
 import { ValidationFn, Validator } from "@/lib/Validator";
-import { signup } from "@/app/signup/actions";
+import { signup } from "@/app/(root)/signup/actions";
 
 const IS_PASSWORD: ValidationFn[] = [Validator.isPassword()];
 const IS_EMAIL = [Validator.isEmail];

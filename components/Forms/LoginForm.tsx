@@ -3,7 +3,7 @@ import React, { useActionState, useEffect } from "react";
 import Input from "../Input";
 import useInput, { UseInputReturn } from "@/hooks/useInput";
 import { Validator } from "@/lib/Validator";
-import { login } from "@/app/login/actions";
+import { login } from "@/app/(root)/login/actions";
 
 const IS_EMAIL = [Validator.isEmail];
 

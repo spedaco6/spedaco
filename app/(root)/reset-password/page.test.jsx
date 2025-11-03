@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { afterAll, describe, expect, test, vi } from "vitest";
 import PasswordResetPage from "./page";
 import { resetPassword } from "./action";
-import PasswordResetForm from "../../components/Forms/PasswordResetForm";
+import PasswordResetForm from "../../../components/Forms/PasswordResetForm";
 import { beforeEach } from "node:test";
 
 vi.mock("./action", () => ({
